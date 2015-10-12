@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:showIn="@layout/activity_video"
+    tools:context="org.garywzh.quumiivideo.ui.VideoActivity">
+
+    <WebView
+        android:layout_width="match_parent"
+        android:layout_height="202.5dp"
+        android:id="@+id/webview"
+        android:layerType="hardware" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/webview"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        style="@style/AppTheme.VideoTitle"
+        android:id="@+id/title_tv"
+        tools:text="俄里海舰队打击叙利亚境内目标" />
+
+    <ListView
+        android:layout_below="@id/title_tv"
+        android:id="@+id/list_view"
+        android:divider="@null"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+
+</RelativeLayout>

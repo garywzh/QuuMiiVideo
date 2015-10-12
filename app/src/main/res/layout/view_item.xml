@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
+
+    <ImageView
+        android:id="@+id/cover_img"
+        android:layout_width="140dp"
+        android:layout_height="70dp"
+        tools:src="@drawable/coverpic_default"
+        android:contentDescription="@string/desc_coverpic"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/AppTheme.Item.TimeLength"
+        tools:text="2:00"
+        android:id="@+id/timelength_tv"
+        android:layout_marginBottom="6dp"
+        android:layout_marginEnd="6dp"
+        android:layout_alignEnd="@id/cover_img"
+        android:layout_alignBottom="@id/cover_img"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/AppTheme.Item.Title"
+        tools:text="美国人初次试吃榴莲"
+        android:id="@+id/title_tv"
+        android:layout_marginStart="8dp"
+        android:maxLines="3"
+        android:ellipsize="end"
+        android:layout_alignTop="@id/cover_img"
+        android:layout_toEndOf="@id/cover_img" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/AppTheme.Item.Time"
+        tools:text="1小时前"
+        android:id="@+id/time_tv"
+        android:layout_alignBottom="@id/cover_img"
+        android:layout_alignStart="@id/title_tv" />
+
+</RelativeLayout>
