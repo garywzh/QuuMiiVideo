@@ -3,9 +3,6 @@ package org.garywzh.quumiivideo.model;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
-/**
- * Created by WZH on 2015/10/10.
- */
 public class Comment {
 
     private final int mId;

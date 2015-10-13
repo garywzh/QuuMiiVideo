@@ -13,7 +13,7 @@ import org.garywzh.quumiivideo.model.Comment;
 import org.garywzh.quumiivideo.model.Member;
 
 /**
- * Created by WZH on 2015/10/10.
+ * Created by garywzh on 2015/10/10.
  */
 public class CommentListParser extends Parser {
 

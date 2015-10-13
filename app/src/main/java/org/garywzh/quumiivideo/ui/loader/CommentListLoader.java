@@ -9,7 +9,7 @@ import java.util.List;
 import org.garywzh.quumiivideo.model.Comment;
 
 /**
- * Created by WZH on 2015/10/10.
+ * Created by garywzh on 2015/10/10.
  */
 public class CommentListLoader extends AsyncTaskLoader<List<Comment>> {
 

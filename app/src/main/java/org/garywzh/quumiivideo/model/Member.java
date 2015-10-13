@@ -4,9 +4,6 @@ import com.google.common.base.Objects;
 
 import org.garywzh.quumiivideo.network.RequestHelper;
 
-/**
- * Created by WZH on 2015/10/10.
- */
 public class Member {
     private final int mId;
     private final String mName;

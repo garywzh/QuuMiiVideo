@@ -1,7 +1,7 @@
 package org.garywzh.quumiivideo.model;
 
 /**
- * Created by WZH on 2015/9/22.
+ * Created by garywzh on 2015/9/22.
  */
 
 import com.google.common.base.Objects;

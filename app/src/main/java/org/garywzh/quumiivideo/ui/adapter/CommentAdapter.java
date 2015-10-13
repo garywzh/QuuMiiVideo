@@ -17,9 +17,6 @@ import org.garywzh.quumiivideo.R;
 import org.garywzh.quumiivideo.model.Comment;
 import org.garywzh.quumiivideo.model.Member;
 
-/**
- * Created by WZH on 2015/10/10.
- */
 public class CommentAdapter extends BaseAdapter {
     private final LayoutInflater mInflater;
     private final OnCommentActionListener mListener;
