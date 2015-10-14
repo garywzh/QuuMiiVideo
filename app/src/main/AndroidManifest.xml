@@ -23,7 +23,7 @@
         <activity
             android:name="org.garywzh.quumiivideo.ui.VideoActivity"
             android:label="@string/title_activity_video"
-            android:theme="@style/AppTheme.NoActionBar" >
+            android:theme="@style/AppTheme.NoActionBar.BlackStatusBar" >
         </activity>
     </application>
 
