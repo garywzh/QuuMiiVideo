@@ -26,7 +26,7 @@ import org.garywzh.quumiivideo.ui.loader.ItemListLoader;
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<AsyncTaskLoader.LoaderResult<List<Item>>>, SwipeRefreshLayout.OnRefreshListener, ItemAdapter.OnItemActionListener {
     private static final String TAG = MainActivity.class.getSimpleName();
-    private SwipeRefreshLayout swipeRefreshLayout;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
     private ItemAdapter mAdapter;
 
     @Override
@@ -36,24 +36,24 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefreshlayout);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefreshlayout);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycle_view);
 
-        swipeRefreshLayout.setOnRefreshListener(this);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
         mAdapter = new ItemAdapter(this);
         recyclerView.setAdapter(mAdapter);
 
-        LogUtils.d(TAG, "swipeRefreshLayout done");
+        LogUtils.d(TAG, "mSwipeRefreshLayout done");
 
         getSupportLoaderManager().initLoader(0, null, this);
 
-        swipeRefreshLayout.post(new Runnable() {
+        mSwipeRefreshLayout.post(new Runnable() {
             @Override
             public void run() {
-                swipeRefreshLayout.setRefreshing(true);
+                mSwipeRefreshLayout.setRefreshing(true);
             }
         });
     }
@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         }
 
         mAdapter.setDataSource(result.mResult);
-        swipeRefreshLayout.setRefreshing(false);
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         int id = item.getItemId();
 
         if (id == R.id.action_refresh) {
-            swipeRefreshLayout.setRefreshing(true);
+            mSwipeRefreshLayout.setRefreshing(true);
             onRefresh();
             return true;
         }

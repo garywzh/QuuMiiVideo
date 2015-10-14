@@ -128,7 +128,6 @@ public class VideoActivity extends AppCompatActivity implements CommentAdapter.O
         Intent i = new Intent(Intent.ACTION_VIEW);
         i.setData(Uri.parse(Member.buildUrlFromId(member.getId())));
         startActivity(i);
-
     }
 
     public class VideoLinkTask extends AsyncTask<Void, Void, String> {

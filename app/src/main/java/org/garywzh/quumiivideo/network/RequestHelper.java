@@ -82,24 +82,6 @@ public class RequestHelper {
         return allItems;
     }
 
-    public static String getRedirectUrl(String url) throws ConnectionException, RemoteException {
-        final Request request = new Request.Builder()
-                .url(url)
-                .build();
-
-        final Response response = sendRequest(request);
-
-        final String responseBody;
-        try {
-            responseBody = response.body().string();
-
-            LogUtils.d(TAG, responseBody);
-        } catch (IOException e) {
-            throw new ConnectionException(e);
-        }
-        return response.header("Request URL");
-    }
-
     public static String getWebViewLinkById(String id) throws ConnectionException, RemoteException {
         final Request request = new Request.Builder()
                 .url(VIDEO_URL + id)
