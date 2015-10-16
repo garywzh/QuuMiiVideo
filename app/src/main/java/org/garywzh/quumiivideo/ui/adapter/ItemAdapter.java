@@ -14,6 +14,7 @@ import org.garywzh.quumiivideo.model.Item;
 
 import org.garywzh.quumiivideo.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
@@ -27,7 +28,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
 
     public void setDataSource(List<Item> data) {
         mData = data;
-
         notifyDataSetChanged();
     }
 

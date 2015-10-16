@@ -13,21 +13,25 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import org.garywzh.quumiivideo.R;
 import org.garywzh.quumiivideo.model.Item;
 import org.garywzh.quumiivideo.ui.adapter.ItemAdapter;
 import org.garywzh.quumiivideo.ui.loader.AsyncTaskLoader;
+import org.garywzh.quumiivideo.ui.loader.ItemListLoader;
 import org.garywzh.quumiivideo.util.LogUtils;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import org.garywzh.quumiivideo.R;
-
-import org.garywzh.quumiivideo.ui.loader.ItemListLoader;
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<AsyncTaskLoader.LoaderResult<List<Item>>>, SwipeRefreshLayout.OnRefreshListener, ItemAdapter.OnItemActionListener {
     private static final String TAG = MainActivity.class.getSimpleName();
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ItemAdapter mAdapter;
+    private RecyclerView recyclerView;
+    private LinearLayoutManager linearLayoutManager;
+    private boolean onLoading;
+    private int mCount;
+    private List<Item> mItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,25 +41,50 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         setSupportActionBar(toolbar);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefreshlayout);
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycle_view);
+        recyclerView = (RecyclerView) findViewById(R.id.recycle_view);
 
         mSwipeRefreshLayout.setOnRefreshListener(this);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
+        linearLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(linearLayoutManager);
 
         mAdapter = new ItemAdapter(this);
         recyclerView.setAdapter(mAdapter);
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                LogUtils.d(TAG, "onScroll activated. onLoading state : " + onLoading);
 
-        LogUtils.d(TAG, "mSwipeRefreshLayout done");
+                if (!onLoading) {
+                    int visibleItemCount = linearLayoutManager.getChildCount();
+                    int totalItemCount = linearLayoutManager.getItemCount();
+                    int pastItems = linearLayoutManager.findFirstVisibleItemPosition();
+                    if ((pastItems + visibleItemCount) >= (totalItemCount - 6)) {
 
-        getSupportLoaderManager().initLoader(0, null, this);
+                        LogUtils.d(TAG, "scrolled to bottom, loading more");
+                        onLoading = true;
+                        mSwipeRefreshLayout.setRefreshing(true);
 
+                        final ItemListLoader loader = getLoader();
+                        if (loader == null) {
+                            return;
+                        }
+                        loader.setPage(mCount + 1);
+                    }
+                }
+            }
+        });
+
+        mItems = new ArrayList<>();
+        onLoading = true;
+        mCount = 0;
         mSwipeRefreshLayout.post(new Runnable() {
             @Override
             public void run() {
                 mSwipeRefreshLayout.setRefreshing(true);
             }
         });
+
+        getSupportLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -69,8 +98,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             return;
         }
 
-        mAdapter.setDataSource(result.mResult);
+        mCount++;
+        mItems.addAll(result.mResult);
+        mAdapter.setDataSource(mItems);
         mSwipeRefreshLayout.setRefreshing(false);
+        onLoading = false;
     }
 
     @Override
@@ -78,13 +110,20 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mAdapter.setDataSource(null);
     }
 
+    private ItemListLoader getLoader() {
+        return (ItemListLoader) getSupportLoaderManager().<AsyncTaskLoader.LoaderResult<List<Item>>>getLoader(0);
+    }
+
+
     @Override
     public void onRefresh() {
-        final Loader<?> loader = getSupportLoaderManager().getLoader(0);
-        if (loader == null) {
-            return;
+        if (!onLoading) {
+            final ItemListLoader loader = getLoader();
+            if (loader == null) {
+                return;
+            }
+            loader.forceLoad();
         }
-        loader.forceLoad();
     }
 
     @Override
