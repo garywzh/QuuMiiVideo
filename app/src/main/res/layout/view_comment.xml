@@ -11,8 +11,8 @@
 
     <ImageView
         android:id="@+id/avatar_img"
-        android:layout_width="35dp"
-        android:layout_height="35dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         tools:src="@drawable/avatar_default"
         android:contentDescription="@string/desc_avatar"/>
 
@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         tools:text="aabbccdd"
         android:id="@+id/username_tv"
-        style="@style/AppTheme.Comment.Name"
+        style="@style/TextAppearance.AppCompat.Body1"
         android:layout_marginStart="16dp"
         android:maxLines="1"
         android:ellipsize="end"
@@ -35,6 +35,7 @@
         android:id="@+id/content_tv"
         style="@style/AppTheme.Comment.Content"
         android:layout_below="@id/username_tv"
+        android:layout_marginTop="4dp"
         android:layout_alignStart="@id/username_tv" />
 
     <TextView
@@ -43,7 +44,7 @@
         tools:text="12小时前"
         android:id="@+id/time_tv"
         style="@style/AppTheme.Comment.Time"
-        android:layout_alignTop="@id/avatar_img"
-        android:layout_alignParentEnd="true" />
+        android:layout_below="@id/content_tv"
+        android:layout_alignStart="@id/username_tv"/>
 
 </RelativeLayout>

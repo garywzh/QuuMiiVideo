@@ -52,8 +52,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                LogUtils.d(TAG, "onScroll activated. onLoading state : " + onLoading);
-
                 if (!onLoading) {
                     int visibleItemCount = linearLayoutManager.getChildCount();
                     int totalItemCount = linearLayoutManager.getItemCount();
@@ -108,6 +106,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public void onLoaderReset(Loader<AsyncTaskLoader.LoaderResult<List<Item>>> loader) {
         mAdapter.setDataSource(null);
+        LogUtils.d(TAG, "onLoaderReset called");
     }
 
     private ItemListLoader getLoader() {
@@ -122,7 +121,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             if (loader == null) {
                 return;
             }
-            loader.forceLoad();
+            mCount = 0;
+            mItems.clear();
+            loader.setPage(mCount + 1);
         }
     }
 

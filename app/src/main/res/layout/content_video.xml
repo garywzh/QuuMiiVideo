@@ -22,7 +22,7 @@
         android:paddingBottom="8dp"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        style="@style/AppTheme.VideoTitle"
+        style="@style/TextAppearance.AppCompat.Title"
         android:id="@+id/title_tv"
         tools:text="俄里海舰队打击叙利亚境内目标" />
 
