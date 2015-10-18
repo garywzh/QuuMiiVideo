@@ -97,11 +97,24 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         }
 
         mCount++;
-        mItems.addAll(result.mResult);
+        mergeListWithoutDuplicates(mItems, result.mResult);
         mAdapter.setDataSource(mItems);
         mSwipeRefreshLayout.setRefreshing(false);
         onLoading = false;
     }
+
+    private void mergeListWithoutDuplicates(List<Item> toList, List<Item> fromList) {
+        final Item firtItemOfFromList = fromList.get(0);
+        for (int i = toList.size() - 1; i >= 0; i--) {
+            if (toList.get(i).equals(firtItemOfFromList)) {
+                for (int j = toList.size() - 1; j>=i;j--)
+                    toList.remove(j);
+                break;
+            }
+        }
+        toList.addAll(fromList);
+    }
+
 
     @Override
     public void onLoaderReset(Loader<AsyncTaskLoader.LoaderResult<List<Item>>> loader) {
