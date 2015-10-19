@@ -12,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import org.garywzh.quumiibox.ui.loader.AsyncTaskLoader;
 import org.garywzh.quumiibox.R;
@@ -93,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public void onLoadFinished(Loader<AsyncTaskLoader.LoaderResult<List<Item>>> loader, AsyncTaskLoader.LoaderResult<List<Item>> result) {
         if (result.hasException()) {
+            Toast.makeText(this, "视频列表加载失败 - 网络错误", Toast.LENGTH_SHORT).show();
             return;
         }
 

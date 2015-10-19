@@ -18,7 +18,7 @@
             android:layout_height="match_parent"
             app:contentScrim="?attr/colorPrimary"
             app:expandedTitleTextAppearance="@style/CollapsingToolbarTitleStyle"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+            app:layout_scrollFlags="snap">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -59,7 +59,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="@android:color/transparent"
-                app:layout_collapseMode="pin" />
+                app:layout_collapseMode="pin"/>
 
         </android.support.design.widget.CollapsingToolbarLayout>
 
@@ -136,6 +136,7 @@
                     android:text="@string/github_link" />
 
             </RelativeLayout>
+
         </LinearLayout>
     </android.support.v4.widget.NestedScrollView>
 

@@ -13,6 +13,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.garywzh.quumiibox.common.exception.ConnectionException;
 import org.garywzh.quumiibox.model.Member;
@@ -112,6 +113,7 @@ public class VideoActivity extends AppCompatActivity implements CommentAdapter.O
     @Override
     public void onLoadFinished(Loader<AsyncTaskLoader.LoaderResult<List<Comment>>> loader, AsyncTaskLoader.LoaderResult<List<Comment>> result) {
         if (result.hasException()) {
+            Toast.makeText(this, "评论加载失败 - 网络错误", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -121,6 +123,7 @@ public class VideoActivity extends AppCompatActivity implements CommentAdapter.O
     @Override
     public void onLoaderReset(Loader<AsyncTaskLoader.LoaderResult<List<Comment>>> loader) {
         mCommentAdapter.setDataSource(null);
+        LogUtils.d(TAG, "onLoaderReset called");
     }
 
     @Override
