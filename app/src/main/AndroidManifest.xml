@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.garywzh.quumiibox" >
+    package="org.garywzh.quumiibox">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -9,7 +9,8 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
+
         <activity
             android:name=".ui.MainActivity"
             android:label="@string/app_name">
@@ -22,12 +23,11 @@
         <activity
             android:name=".ui.VideoActivity"
             android:label="@string/title_activity_video"
-            android:theme="@style/AppTheme.BlackStatusBar" >
-        </activity>
+            android:theme="@style/AppTheme.BlackStatusBar"></activity>
 
-        <activity android:name=".ui.AboutActivity"
-            android:label="@string/action_about">
-        </activity>
+        <activity
+            android:name=".ui.AboutActivity"
+            android:label="@string/action_about"></activity>
 
     </application>
 

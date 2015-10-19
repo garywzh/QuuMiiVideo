@@ -82,7 +82,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:text="@string/introduce"/>
+                android:text="@string/introduce" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -95,7 +95,7 @@
                     android:layout_height="wrap_content"
                     android:autoLink="web"
                     android:text="@string/introduce"
-                    android:textIsSelectable="true"/>
+                    android:textIsSelectable="true" />
             </RelativeLayout>
 
             <TextView
@@ -103,7 +103,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 android:layout_marginTop="24dp"
-                android:text="@string/developer"/>
+                android:text="@string/developer" />
 
             <RelativeLayout
                 android:id="@+id/tv_developer"
@@ -116,7 +116,7 @@
                     android:id="@+id/ig_avatar_garywzh"
                     android:layout_width="@dimen/avatar_size"
                     android:layout_height="@dimen/avatar_size"
-                    android:src="@mipmap/ic_launcher" />
+                    android:src="@drawable/avatar_developer" />
 
                 <TextView
                     android:id="@+id/tv_garywzh"
