@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/QuumiiVideo.iml" filepath="$PROJECT_DIR$/QuumiiVideo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/QuumiiBox.iml" filepath="$PROJECT_DIR$/QuumiiBox.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
