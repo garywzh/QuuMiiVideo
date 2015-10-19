@@ -1,13 +1,10 @@
 package org.garywzh.quumiibox.ui;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.TextView;
 
 import org.garywzh.quumiibox.BuildConfig;
@@ -31,18 +28,6 @@ public class AboutActivity extends AppCompatActivity {
 
         mCollapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         mCollapsingToolbarLayout.setTitle(getString(R.string.app_name));
-
-        View developerView = findViewById(R.id.tv_developer);
-        developerView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Intent intent = new Intent(Intent.ACTION_VIEW);
-
-                intent.setData(Uri.parse("https://github.com/garywzh/QuumiiBox"));
-
-                startActivity(intent);
-            }
-        });
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }

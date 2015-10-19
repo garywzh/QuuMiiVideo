@@ -7,7 +7,11 @@
     <string name="action_refresh">Refresh</string>
     <string name="desc_avatar">Avatar</string>
     <string name="developer">Developer</string>
-    <string name="github_link">https://github.com/garywzh/QuumiiBox</string>
     <string name="introduce">Introduce</string>
-    <string name="introduce_detail">QuumiiBox is a third-party Android client for http://www.quumii.com/videolist.php</string>
+    <string name="introduce_detail">QuumiiBox is a third-party OpenSource Android client for http://www.quumii.com/videolist.php . You can find it on github: https://github.com/garywzh/QuumiiBox</string>
+    <string name="garywzh_github">GitHub: https://github.com/garywzh</string>
+    <string name="garywzh_weibo">Weibo : http://weibo.com/lengyuhanchen</string>
+    <string name="thanks">Thanks</string>
+    <string name="thanks_detail">Thanks to www.quumii.com for offering those useful data.</string>
+
 </resources>
