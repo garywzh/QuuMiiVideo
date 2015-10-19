@@ -24,6 +24,7 @@
         android:paddingEnd="16dp"
         style="@style/TextAppearance.AppCompat.Title"
         android:id="@+id/title_tv"
+        android:background="@color/titleBackground"
         tools:text="俄里海舰队打击叙利亚境内目标" />
 
     <ListView
@@ -32,6 +33,5 @@
         android:divider="@null"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-
 
 </RelativeLayout>

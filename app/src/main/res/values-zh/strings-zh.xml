@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">趣觅视频</string>
-    <string name="action_settings">设置</string>
-    <string name="title_activity_base">BaseActivity</string>
-    <string name="desc_coverpic">CoverPic</string>
-    <string name="title_activity_video">VideoActivity</string>
-    <string name="action_refresh">刷新</string>
-</resources>

@@ -174,7 +174,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         }
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_about) {
+            final Intent intent = new Intent(this, AboutActivity.class);
+            startActivity(intent);
             return true;
         }
 

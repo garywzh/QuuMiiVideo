@@ -1,4 +1,4 @@
-# QuumiiVideo
+# QuumiiBox
 A Android client for [趣觅](http://www.quumii.com/videolist.php)
 
 *目前首页加载最新的36个视频。

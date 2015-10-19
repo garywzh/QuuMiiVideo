@@ -18,7 +18,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="@style/AppTheme.Item.TimeLength"
+        style="@style/Item.TimeLength"
         tools:text="2:00"
         android:id="@+id/timelength_tv"
         android:layout_marginBottom="6dp"

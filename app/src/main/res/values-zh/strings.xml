@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">趣觅盒子</string>
+    <string name="action_about">关于</string>
+    <string name="title_activity_base">BaseActivity</string>
+    <string name="desc_coverpic">CoverPic</string>
+    <string name="title_activity_video">VideoActivity</string>
+    <string name="action_refresh">刷新</string>
+    <string name="app_name_with_introduce">趣觅盒子是一个趣觅(www.quumii.com)的第三方客户端</string>
+    <string name="developer">开发者</string>
+    <string name="introduce">介绍</string>
+    <string name="introduce_detail">介绍内容</string>
+</resources>

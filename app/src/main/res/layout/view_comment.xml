@@ -33,7 +33,7 @@
         android:layout_height="wrap_content"
         tools:text="内容不错很好看"
         android:id="@+id/content_tv"
-        style="@style/AppTheme.Comment.Content"
+        style="@style/Comment.Content"
         android:layout_below="@id/username_tv"
         android:layout_marginTop="4dp"
         android:layout_alignStart="@id/username_tv" />
@@ -43,7 +43,7 @@
         android:layout_height="wrap_content"
         tools:text="12小时前"
         android:id="@+id/time_tv"
-        style="@style/AppTheme.Comment.Time"
+        style="@style/Comment.Time"
         android:layout_below="@id/content_tv"
         android:layout_alignStart="@id/username_tv"/>
 
