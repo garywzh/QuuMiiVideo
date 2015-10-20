@@ -74,7 +74,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
 
             mCoverPic = ((ImageView) view.findViewById(R.id.cover_img));
             mTimeLength = ((TextView) view.findViewById(R.id.timelength_tv));
-            mTitle = ((TextView) view.findViewById(R.id.title_tv));
+            mTitle = ((TextView) view.findViewById(R.id.tv_title));
             mTime = ((TextView) view.findViewById(R.id.time_tv));
         }
 

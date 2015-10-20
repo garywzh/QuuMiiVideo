@@ -31,7 +31,7 @@
         android:layout_height="wrap_content"
         style="@style/TextAppearance.AppCompat.Body2"
         tools:text="美国人初次试吃榴莲"
-        android:id="@+id/title_tv"
+        android:id="@+id/tv_title"
         android:layout_marginStart="8dp"
         android:maxLines="3"
         android:ellipsize="end"
@@ -45,6 +45,6 @@
         tools:text="1小时前"
         android:id="@+id/time_tv"
         android:layout_alignBottom="@id/cover_img"
-        android:layout_alignStart="@id/title_tv" />
+        android:layout_alignStart="@id/tv_title" />
 
 </RelativeLayout>

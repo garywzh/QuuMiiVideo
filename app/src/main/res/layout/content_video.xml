@@ -23,12 +23,12 @@
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         style="@style/TextAppearance.AppCompat.Title"
-        android:id="@+id/title_tv"
+        android:id="@+id/tv_title"
         android:background="@color/titleBackground"
         tools:text="俄里海舰队打击叙利亚境内目标" />
 
     <ListView
-        android:layout_below="@id/title_tv"
+        android:layout_below="@id/tv_title"
         android:id="@+id/list_view"
         android:divider="@null"
         android:layout_width="match_parent"

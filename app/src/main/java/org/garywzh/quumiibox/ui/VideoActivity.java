@@ -52,7 +52,7 @@ public class VideoActivity extends AppCompatActivity implements CommentAdapter.O
         final String mTitle = getIntent().getStringExtra("title");
         mId = getIntent().getStringExtra("id");
 
-        mTiTleView = (TextView) findViewById(R.id.title_tv);
+        mTiTleView = (TextView) findViewById(R.id.tv_title);
         mTiTleView.setText(mTitle);
 
         mWebView = (WebView) findViewById(R.id.webview);

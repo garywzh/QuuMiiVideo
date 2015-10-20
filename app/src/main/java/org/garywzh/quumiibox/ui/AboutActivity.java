@@ -1,7 +1,9 @@
 package org.garywzh.quumiibox.ui;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -20,6 +22,12 @@ public class AboutActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+//        set statusbar color
+        if (Build.VERSION.SDK_INT >= 21) {
+            getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.md_blue_grey_700));
+        }
+
         setContentView(R.layout.activity_about);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
