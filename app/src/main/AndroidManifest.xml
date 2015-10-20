@@ -15,7 +15,7 @@
         android:theme="@style/AppTheme">
 
         <meta-data android:value="56258ad467e58e1fc9002dbb" android:name="UMENG_APPKEY"/>
-        <meta-data android:value="GitHub" android:name="UMENG_CHANNEL"/>
+        <meta-data android:value="${UMENG_CHANNEL_VALUE}" android:name="UMENG_CHANNEL"/>
 
         <activity
             android:name=".ui.MainActivity"
