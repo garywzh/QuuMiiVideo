@@ -14,6 +14,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.umeng.analytics.MobclickAgent;
+
 import org.garywzh.quumiibox.ui.loader.AsyncTaskLoader;
 import org.garywzh.quumiibox.R;
 import org.garywzh.quumiibox.model.Item;
@@ -140,6 +142,18 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             mItems.clear();
             loader.setPage(mCount + 1);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
     }
 
     @Override

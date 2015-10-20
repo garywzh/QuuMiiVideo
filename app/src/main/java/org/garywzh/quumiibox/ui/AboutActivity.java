@@ -7,6 +7,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.umeng.analytics.MobclickAgent;
+
 import org.garywzh.quumiibox.BuildConfig;
 import org.garywzh.quumiibox.R;
 
@@ -30,6 +32,18 @@ public class AboutActivity extends AppCompatActivity {
         mCollapsingToolbarLayout.setTitle(getString(R.string.app_name));
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
     }
 
     @Override

@@ -15,6 +15,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.umeng.analytics.MobclickAgent;
+
 import org.garywzh.quumiibox.common.exception.ConnectionException;
 import org.garywzh.quumiibox.model.Member;
 import org.garywzh.quumiibox.ui.loader.AsyncTaskLoader;
@@ -89,12 +91,14 @@ public class VideoActivity extends AppCompatActivity implements CommentAdapter.O
     protected void onResume() {
         super.onResume();
         mWebView.onResume();
+        MobclickAgent.onResume(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         mWebView.onPause();
+        MobclickAgent.onPause(this);
     }
 
     @Override
