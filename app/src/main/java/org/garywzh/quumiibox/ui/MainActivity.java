@@ -100,6 +100,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             return;
         }
 
+        if (mCount == 0){
+            mItems.clear();
+        }
+
         mCount++;
         mergeListWithoutDuplicates(mItems, result.mResult);
         mAdapter.setDataSource(mItems);
@@ -138,8 +142,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             if (loader == null) {
                 return;
             }
+            onLoading = true;
             mCount = 0;
-            mItems.clear();
             loader.setPage(mCount + 1);
         }
     }
