@@ -42,7 +42,6 @@ public class VideoActivity extends AppCompatActivity implements CommentAdapter.O
     private int heightPixels;
 
     private CommentAdapter mCommentAdapter;
-    private List<Comment> mComments;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,10 +75,11 @@ public class VideoActivity extends AppCompatActivity implements CommentAdapter.O
             }
         });
 
-        ListView mCommentsView = (ListView) findViewById(R.id.list_view);
+        ListView mCommentsView = (ListView) findViewById(R.id.listview);
         mCommentAdapter = new CommentAdapter(this);
-        mCommentAdapter.setDataSource(mComments);
+        mCommentAdapter.setDataSource(null);
         mCommentsView.setAdapter(mCommentAdapter);
+        mCommentsView.setEmptyView(findViewById(R.id.tv_emptyResults));
 
         VideoLinkTask mVideoLinkTask = new VideoLinkTask(mId);
         mVideoLinkTask.execute((Void) null);
