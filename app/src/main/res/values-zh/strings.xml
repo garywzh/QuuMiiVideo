@@ -8,8 +8,10 @@
     <string name="action_refresh">刷新</string>
     <string name="developer">开发者</string>
     <string name="introduce">介绍</string>
-    <string name="introduce_detail">趣觅盒子是趣觅网( http://www.quumii.com/videolist.php )的一个第三方Android客户端，由garywzh设计开发，数据来自趣觅网。\n\n作为一个开源软件，程序代码放在github( https://github.com/garywzh/QuumiiBox )上，欢迎大家提出意见或建议。\n\n由于展示效果的原因，目前只支持来自优酷和新浪的视频在应用内播放，其他来源的视频会转到浏览器加载视频链接。</string>
+    <string name="introduce_detail">趣觅盒子是趣觅网( http://www.quumii.com/videolist.php )的一个第三方Android客户端，由garywzh设计开发，数据来自趣觅网。\n\n作为一个开源软件，程序代码放在github( https://github.com/garywzh/QuumiiBox )上，欢迎大家提出意见或建议。\n\n由于展示效果的原因，目前只支持来自部分网站（如优酷，新浪，趣觅cdn）的视频在应用内播放，其他来源（如秒拍）的视频会转到浏览器加载视频链接。</string>
     <string name="thanks">致谢</string>
-    <string name="thanks_detail">感谢趣觅网( http://www.quumii.com/videolist.php )提供的所用到数据</string>
+    <string name="thanks_detail">感谢趣觅网( http://www.quumii.com/videolist.php )提供的数据</string>
     <string name="no_comments">暂无评论</string>
+    <string name="download">下载</string>
+    <string name="download_link">首先记住顶部图标下面的版本号然后点击 http://fir.im/8rkc 查看是否有新版本下载</string>
 </resources>

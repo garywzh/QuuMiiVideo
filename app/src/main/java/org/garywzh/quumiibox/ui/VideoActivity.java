@@ -17,21 +17,20 @@ import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
 
+import org.garywzh.quumiibox.R;
 import org.garywzh.quumiibox.common.exception.ConnectionException;
-import org.garywzh.quumiibox.model.Member;
-import org.garywzh.quumiibox.ui.loader.AsyncTaskLoader;
-import org.garywzh.quumiibox.ui.loader.CommentListLoader;
 import org.garywzh.quumiibox.common.exception.RemoteException;
 import org.garywzh.quumiibox.model.Comment;
+import org.garywzh.quumiibox.model.Member;
 import org.garywzh.quumiibox.network.RequestHelper;
 import org.garywzh.quumiibox.ui.adapter.CommentAdapter;
+import org.garywzh.quumiibox.ui.loader.AsyncTaskLoader;
+import org.garywzh.quumiibox.ui.loader.CommentListLoader;
 import org.garywzh.quumiibox.util.LogUtils;
 
 import java.util.List;
 
-import org.garywzh.quumiibox.R;
-
-public class VideoActivity extends AppCompatActivity implements CommentAdapter.OnCommentActionListener, LoaderManager.LoaderCallbacks<AsyncTaskLoader.LoaderResult<List<Comment>>>{
+public class VideoActivity extends AppCompatActivity implements CommentAdapter.OnCommentActionListener, LoaderManager.LoaderCallbacks<AsyncTaskLoader.LoaderResult<List<Comment>>> {
 
     private static final String TAG = VideoActivity.class.getSimpleName();
 
@@ -158,25 +157,29 @@ public class VideoActivity extends AppCompatActivity implements CommentAdapter.O
         }
 
         @Override
-        protected void onPostExecute( String result) {
+        protected void onPostExecute(String result) {
 
             if (result.equals("error")) {
                 mWebView.loadUrl("http://baidu.com");
-                LogUtils.d(TAG, "error link : "+result);
+                Toast.makeText(getApplicationContext(), "视频连接错误", Toast.LENGTH_LONG).show();
+                LogUtils.d(TAG, "error link : " + result);
             } else if (result.contains("youku")) {
                 mWebView.loadUrl(result);
-                LogUtils.d(TAG, "video link : "+result);
-            }else if (result.contains("letv")){
+                LogUtils.d(TAG, "youku link : " + result);
+            } else if (result.contains("letv")) {
                 mWebView.getSettings().setUseWideViewPort(true);
                 result = result.replace("670", String.valueOf(widthPixels));
                 result = result.replace("490", String.valueOf(heightPixels));
                 mWebView.loadUrl(result);
-                LogUtils.d(TAG, "video link : "+result);
-            }
-            else {
-//                mWebView.getSettings().setUseWideViewPort(true);
-//                mWebView.loadUrl(result);
-//                LogUtils.d(TAG, "video link : " + result);
+                LogUtils.d(TAG, "letv link : " + result);
+            } else if (result.contains("quumii")) {
+                mWebView.getSettings().setUseWideViewPort(true);
+                result = result.replace("670", String.valueOf(widthPixels));
+                result = result.replace("490", String.valueOf(heightPixels));
+                mWebView.loadUrl(result);
+                LogUtils.d(TAG, "quumii link : " + result);
+            } else {
+                LogUtils.d(TAG, "other link : " + result);
 
                 Intent i = new Intent(Intent.ACTION_VIEW);
                 i.setData(Uri.parse(result));

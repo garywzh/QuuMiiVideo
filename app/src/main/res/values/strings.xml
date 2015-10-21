@@ -14,5 +14,7 @@
     <string name="thanks">Thanks</string>
     <string name="thanks_detail">Thanks to www.quumii.com for offering those useful data.</string>
     <string name="no_comments">No comments</string>
+    <string name="download">Download</string>
+    <string name="download_link">New version http://fir.im/8rkc</string>
 
 </resources>
