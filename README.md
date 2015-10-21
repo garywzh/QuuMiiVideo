@@ -2,6 +2,8 @@
 
 趣觅盒子是[趣觅](http://www.quumii.com/videolist.php)的一个第三方客户端，数据来源于趣觅网。
 
+下载应用最新版本请戳 http://fir.im/8rkc
+
 ##FEATURE
 
 *如果视频源不是优酷或新浪，会打开浏览器加载视频链接。
