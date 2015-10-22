@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId 'org.garywzh.quumiibox'
-        minSdkVersion 17
+        minSdkVersion 14
         targetSdkVersion 23
         versionCode 4
         versionName '1.0.3'
