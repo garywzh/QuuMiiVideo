@@ -47,8 +47,8 @@ android {
         github {
             manifestPlaceholders = [UMENG_CHANNEL_VALUE: "github"]
         }
-        firim {
-            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "firim"]
+        pre {
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "pre"]
         }
     }
 

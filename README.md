@@ -2,7 +2,7 @@
 
 趣觅盒子是[趣觅](http://www.quumii.com/videolist.php)的一个第三方客户端，数据来源于趣觅网。
 
-下载应用最新版本请戳 https://github.com/garywzh/QuumiiBox/releases
+下载应用最新版本请戳 http://pre.im/1b07
 
 ##FEATURE
 
