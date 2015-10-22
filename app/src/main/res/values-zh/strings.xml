@@ -13,5 +13,5 @@
     <string name="thanks_detail">感谢趣觅网( http://www.quumii.com/videolist.php )提供的数据</string>
     <string name="no_comments">暂无评论</string>
     <string name="download">下载</string>
-    <string name="download_link">首先记住顶部图标下面的版本号然后点击 http://fir.im/8rkc 查看是否有新版本下载</string>
+    <string name="download_link">首先记住顶部图标下面的版本号然后点击 https://github.com/garywzh/QuumiiBox/releases 查看是否有新版本下载</string>
 </resources>
