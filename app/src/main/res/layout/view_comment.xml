@@ -23,10 +23,12 @@
         android:id="@+id/username_tv"
         style="@style/TextAppearance.AppCompat.Body1"
         android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
         android:maxLines="1"
         android:ellipsize="end"
         android:layout_alignTop="@id/avatar_img"
-        android:layout_toEndOf="@id/avatar_img" />
+        android:layout_toEndOf="@id/avatar_img"
+        android:layout_toRightOf="@id/avatar_img"/>
 
     <TextView
         android:layout_width="match_parent"
@@ -36,7 +38,8 @@
         style="@style/Comment.Content"
         android:layout_below="@id/username_tv"
         android:layout_marginTop="4dp"
-        android:layout_alignStart="@id/username_tv" />
+        android:layout_alignStart="@id/username_tv"
+        android:layout_alignLeft="@id/username_tv" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -45,6 +48,7 @@
         android:id="@+id/time_tv"
         style="@style/Comment.Time"
         android:layout_below="@id/content_tv"
-        android:layout_alignStart="@id/username_tv"/>
+        android:layout_alignStart="@id/username_tv"
+        android:layout_alignLeft="@id/username_tv"        />
 
 </RelativeLayout>

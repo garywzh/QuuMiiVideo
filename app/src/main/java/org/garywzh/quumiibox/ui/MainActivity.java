@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         setSupportActionBar(toolbar);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefreshlayout);
-        recyclerView = (RecyclerView) findViewById(R.id.recycleview);
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
 
         mSwipeRefreshLayout.setOnRefreshListener(this);
         linearLayoutManager = new LinearLayoutManager(this);
