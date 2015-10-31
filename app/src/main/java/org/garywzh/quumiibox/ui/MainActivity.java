@@ -46,9 +46,26 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         setSupportActionBar(toolbar);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefreshlayout);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
+
+        initRecyclerView();
+
+        mItems = new ArrayList<>();
+        onLoading = true;
+        mCount = 0;
+        mSwipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeRefreshLayout.setRefreshing(true);
+            }
+        });
+
+        getSupportLoaderManager().initLoader(0, null, this);
+    }
+
+    private void initRecyclerView() {
         recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
 
-        mSwipeRefreshLayout.setOnRefreshListener(this);
         linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
 
@@ -76,18 +93,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 }
             }
         });
-
-        mItems = new ArrayList<>();
-        onLoading = true;
-        mCount = 0;
-        mSwipeRefreshLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                mSwipeRefreshLayout.setRefreshing(true);
-            }
-        });
-
-        getSupportLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -104,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         if (mCount == 0){
             mItems.clear();
+            linearLayoutManager.scrollToPositionWithOffset(0, 0);
         }
 
         mCount++;
