@@ -5,6 +5,6 @@
     <color name="colorAccent">#2196F3</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
-    <color name="titleBackground">#dddddd</color>
+    <color name="headerBackground">#eeeeee</color>
     <color name="autolink">#33691e</color>
 </resources>

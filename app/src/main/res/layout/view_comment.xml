@@ -20,7 +20,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         tools:text="aabbccdd"
-        android:id="@+id/username_tv"
+        android:id="@+id/tv_username"
         style="@style/TextAppearance.AppCompat.Body1"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
@@ -36,19 +36,19 @@
         tools:text="内容不错很好看"
         android:id="@+id/content_tv"
         style="@style/Comment.Content"
-        android:layout_below="@id/username_tv"
+        android:layout_below="@id/tv_username"
         android:layout_marginTop="4dp"
-        android:layout_alignStart="@id/username_tv"
-        android:layout_alignLeft="@id/username_tv" />
+        android:layout_alignStart="@id/tv_username"
+        android:layout_alignLeft="@id/tv_username" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         tools:text="12小时前"
-        android:id="@+id/time_tv"
+        android:id="@+id/tv_time"
         style="@style/Comment.Time"
         android:layout_below="@id/content_tv"
-        android:layout_alignStart="@id/username_tv"
-        android:layout_alignLeft="@id/username_tv"        />
+        android:layout_alignStart="@id/tv_username"
+        android:layout_alignLeft="@id/tv_username"        />
 
 </RelativeLayout>

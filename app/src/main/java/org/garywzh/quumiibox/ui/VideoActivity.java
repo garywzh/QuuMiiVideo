@@ -5,14 +5,11 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
@@ -20,39 +17,44 @@ import com.umeng.analytics.MobclickAgent;
 import org.garywzh.quumiibox.R;
 import org.garywzh.quumiibox.common.exception.ConnectionException;
 import org.garywzh.quumiibox.common.exception.RemoteException;
-import org.garywzh.quumiibox.model.Comment;
+import org.garywzh.quumiibox.model.Item;
 import org.garywzh.quumiibox.model.Member;
 import org.garywzh.quumiibox.network.RequestHelper;
 import org.garywzh.quumiibox.ui.adapter.CommentAdapter;
-import org.garywzh.quumiibox.ui.loader.AsyncTaskLoader;
-import org.garywzh.quumiibox.ui.loader.CommentListLoader;
+import org.garywzh.quumiibox.ui.fragment.CommentListFragment;
+import org.garywzh.quumiibox.ui.fragment.ItemHeaderFragment;
 import org.garywzh.quumiibox.util.LogUtils;
 
-import java.util.List;
-
-public class VideoActivity extends AppCompatActivity implements CommentAdapter.OnCommentActionListener, LoaderManager.LoaderCallbacks<AsyncTaskLoader.LoaderResult<List<Comment>>> {
-
+public class VideoActivity extends AppCompatActivity implements CommentAdapter.OnCommentActionListener {
     private static final String TAG = VideoActivity.class.getSimpleName();
 
     private WebView mWebView;
-    private TextView mTiTleView;
-    private String mId;
+    private Item mItem;
     private int widthPixels;
     private int heightPixels;
-
-    private CommentAdapter mCommentAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video);
 
-        final String mTitle = getIntent().getStringExtra("title");
-        mId = getIntent().getStringExtra("id");
+        mItem = getIntent().getExtras().getParcelable("item");
 
-        mTiTleView = (TextView) findViewById(R.id.tv_title);
-        mTiTleView.setText(mTitle);
+        initWebView();
 
+        VideoLinkTask mVideoLinkTask = new VideoLinkTask(mItem.getinfoBasedType());
+        mVideoLinkTask.execute((Void) null);
+
+        final Fragment itemHeaderFragment = ItemHeaderFragment.newInstance(mItem);
+        final Fragment commentListFragment = CommentListFragment.newInstance(mItem.getId());
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.headerview, itemHeaderFragment)
+                .replace(R.id.comments, commentListFragment)
+                .commit();
+    }
+
+    private void initWebView() {
         mWebView = (WebView) findViewById(R.id.webview);
 
         mWebView.setBackgroundColor(Color.parseColor("#000000"));
@@ -73,17 +75,6 @@ public class VideoActivity extends AppCompatActivity implements CommentAdapter.O
                 return true;
             }
         });
-
-        ListView mCommentsView = (ListView) findViewById(R.id.listview);
-        mCommentAdapter = new CommentAdapter(this);
-        mCommentAdapter.setDataSource(null);
-        mCommentsView.setAdapter(mCommentAdapter);
-        mCommentsView.setEmptyView(findViewById(R.id.tv_emptyResults));
-
-        VideoLinkTask mVideoLinkTask = new VideoLinkTask(mId);
-        mVideoLinkTask.execute((Void) null);
-
-        getSupportLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -109,27 +100,6 @@ public class VideoActivity extends AppCompatActivity implements CommentAdapter.O
     }
 
     @Override
-    public Loader<AsyncTaskLoader.LoaderResult<List<Comment>>> onCreateLoader(int id, Bundle args) {
-        return new CommentListLoader(this, Integer.parseInt(mId));
-    }
-
-    @Override
-    public void onLoadFinished(Loader<AsyncTaskLoader.LoaderResult<List<Comment>>> loader, AsyncTaskLoader.LoaderResult<List<Comment>> result) {
-        if (result.hasException()) {
-            Toast.makeText(this, "评论加载失败 - 网络错误", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        mCommentAdapter.setDataSource(result.mResult);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<AsyncTaskLoader.LoaderResult<List<Comment>>> loader) {
-        mCommentAdapter.setDataSource(null);
-        LogUtils.d(TAG, "onLoaderReset called");
-    }
-
-    @Override
     public void onMemberClick(Member member) {
         Intent i = new Intent(Intent.ACTION_VIEW);
         i.setData(Uri.parse(Member.buildUrlFromId(member.getId())));
@@ -137,16 +107,17 @@ public class VideoActivity extends AppCompatActivity implements CommentAdapter.O
     }
 
     public class VideoLinkTask extends AsyncTask<Void, Void, String> {
-        private final String mId;
+        private final String mBlogId;
 
         VideoLinkTask(String id) {
-            mId = id;
+            mBlogId = id;
+            LogUtils.d(TAG, "blogid : " + mBlogId);
         }
 
         @Override
         protected String doInBackground(Void... params) {
             try {
-                final String result = RequestHelper.getWebViewLinkById(mId);
+                final String result = RequestHelper.getWebViewLinkById(mBlogId);
                 if (result != null) {
                     return result;
                 }

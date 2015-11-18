@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/drawer_home"
+            android:checked="true"
+            android:icon="@drawable/ic_explore_black_24dp"
+            android:title="@string/drawer_home" />
+        <item
+            android:id="@+id/drawer_video"
+            android:icon="@drawable/ic_videocam_black_24dp"
+            android:title="@string/drawer_video" />
+        <item
+            android:id="@+id/drawer_image"
+            android:icon="@drawable/ic_photo_black_24dp"
+            android:title="@string/drawer_image" />
+        <item
+            android:id="@+id/drawer_fav"
+            android:icon="@drawable/ic_favorite_black_24dp"
+            android:title="@string/drawer_fav"/>
+    </group>
+
+    <group
+        android:menuCategory="secondary"
+        android:id="@+id/secondary"
+        android:checkableBehavior="none">
+        <item
+            android:id="@+id/drawer_settings"
+            android:icon="@drawable/ic_settings_black_24dp"
+            android:title="@string/action_settings" />
+        <item
+            android:id="@+id/drawer_feedback"
+            android:icon="@drawable/ic_feedback_black_24dp"
+            android:title="@string/drawer_feedback" />
+        <item
+            android:id="@+id/drawer_about"
+            android:icon="@drawable/ic_info_outline_black_24dp"
+            android:title="@string/drawer_about" />
+    </group>
+</menu>

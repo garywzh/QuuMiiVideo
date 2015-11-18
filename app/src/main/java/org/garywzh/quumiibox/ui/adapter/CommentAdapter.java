@@ -1,86 +1,80 @@
 package org.garywzh.quumiibox.ui.adapter;
 
-import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.google.common.base.Preconditions;
+
+import org.garywzh.quumiibox.R;
+import org.garywzh.quumiibox.model.Comment;
+import org.garywzh.quumiibox.model.Member;
 
 import java.util.List;
 
-import org.garywzh.quumiibox.model.Comment;
-import org.garywzh.quumiibox.model.Member;
-import org.garywzh.quumiibox.R;
-
-public class CommentAdapter extends BaseAdapter {
-    private final LayoutInflater mInflater;
+public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHolder> {
     private final OnCommentActionListener mListener;
-    private List<Comment> mCommentList;
+    private List<Comment> mData;
 
-    public CommentAdapter(Context context) {
-        mInflater = LayoutInflater.from(context);
-        mListener = (OnCommentActionListener) context;
+    public CommentAdapter(@NonNull OnCommentActionListener listener) {
+        mListener = listener;
+        setHasStableIds(true);
     }
 
     public void setDataSource(List<Comment> comments) {
-        mCommentList = comments;
+        mData = comments;
         notifyDataSetChanged();
     }
 
     @Override
-    public int getCount() {
-        return mCommentList == null ? 0 : mCommentList.size();
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_comment, parent, false);
+        return new ViewHolder(mListener, view);
     }
 
     @Override
-    public Object getItem(int position) {
-        return mCommentList.get(position);
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        final Comment comment = mData.get(position);
+        holder.fillData(comment);
     }
 
     @Override
     public long getItemId(int position) {
-        return mCommentList.get(position).getId();
+        return mData == null ? RecyclerView.NO_ID : mData.get(position).getId();
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder viewHolder;
-        if (convertView == null) {
-            convertView = mInflater.inflate(R.layout.view_comment, parent , false);
-            viewHolder = new ViewHolder(convertView, mListener);
-            convertView.setTag(viewHolder);
-        } else {
-            viewHolder = ((ViewHolder) convertView.getTag());
-            Preconditions.checkNotNull(viewHolder);
-        }
-
-        final Comment comment = mCommentList.get(position);
-        viewHolder.fillData(comment);
-
-        return convertView;
+    public int getItemCount() {
+        return mData == null ? 0 : mData.size();
     }
 
-    private static class ViewHolder implements View.OnClickListener {
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        private Comment mComment;
         private final ImageView mAvatar;
         private final TextView mUsername;
         private final TextView mContent;
         private final TextView mReplyTime;
+
         private OnCommentActionListener mListener;
+        private Comment mComment;
 
-        public ViewHolder(View view, OnCommentActionListener listener) {
-            mAvatar = ((ImageView) view.findViewById(R.id.avatar_img));
-            mUsername = (TextView) view.findViewById(R.id.username_tv);
-            mContent = (TextView) view.findViewById(R.id.content_tv);
-            mReplyTime = ((TextView) view.findViewById(R.id.time_tv));
+        public ViewHolder(View view) {
+            this(null, view);
+        }
 
+        public ViewHolder(OnCommentActionListener listener, View view) {
+            super(view);
             mListener = listener;
+
+            mAvatar = ((ImageView) view.findViewById(R.id.avatar_img));
+            mUsername = (TextView) view.findViewById(R.id.tv_username);
+            mContent = (TextView) view.findViewById(R.id.content_tv);
+            mReplyTime = ((TextView) view.findViewById(R.id.tv_time));
+
             mAvatar.setOnClickListener(this);
             mUsername.setOnClickListener(this);
         }

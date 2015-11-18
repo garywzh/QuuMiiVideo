@@ -3,39 +3,62 @@
     package="org.garywzh.quumiibox">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
-        android:hardwareAccelerated="true"
+        android:name=".AppContext"
         android:allowBackup="true"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:supportsRtl="false"
         android:theme="@style/AppTheme">
 
-        <!-- 友盟统计-->
-        <meta-data android:value="56258ad467e58e1fc9002dbb" android:name="UMENG_APPKEY"/>
-        <meta-data android:value="${UMENG_CHANNEL_VALUE}" android:name="UMENG_CHANNEL"/>
+        <!-- 友盟统计 -->
+        <meta-data
+            android:name="UMENG_APPKEY"
+            android:value="56258ad467e58e1fc9002dbb" />
+        <meta-data
+            android:name="UMENG_CHANNEL"
+            android:value="${UMENG_CHANNEL_VALUE}" />
 
         <activity
             android:name=".ui.MainActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ui.VideoActivity"
             android:label="@string/title_activity_video"
-            android:theme="@style/AppTheme.BlackStatusBar"/>
-
+            android:theme="@style/AppTheme.BlackStatusBar" />
         <activity
             android:name=".ui.AboutActivity"
-            android:label="@string/action_about"/>
-
+            android:label="@string/action_about" />
+        <activity
+            android:name=".ui.ImageActivity"
+            android:label="@string/title_activity_image" />
+        <activity
+            android:name=".ui.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:theme="@style/AppBaseTheme" />
+        <activity
+            android:name=".ui.CommentsActivity"
+            android:label="@string/title_activity_comments"
+            android:theme="@style/AppBaseTheme" />
+        <activity
+            android:name=".ui.TopicActivity"
+            android:label="@string/title_activity_topic"
+            android:theme="@style/AppBaseTheme" />
+        <activity
+            android:name=".ui.LoginActivity"
+            android:label="@string/title_activity_login"
+            android:theme="@style/AppBaseTheme" />
     </application>
 
 </manifest>
