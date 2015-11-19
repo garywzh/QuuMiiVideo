@@ -113,6 +113,6 @@ public class ItemHeaderFragment extends Fragment {
     @Subscribe
     public void onUserOptionEvent(UserOptionEvent e) {
         AppContext.getEventBus().unregister(this);
-        Toast.makeText(getActivity(), e.isFavSucceed ? "Favorite succeed" : "Delete succeed", Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(), e.isFavSucceed ? getString(R.string.fav_add_sueeccd): getString(R.string.fav_delete_succeed), Toast.LENGTH_LONG).show();
     }
 }

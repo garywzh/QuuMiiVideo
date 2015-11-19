@@ -109,5 +109,8 @@
     <string name="fav">Favorite</string>
     <string name="down">Down</string>
     <string name="up">Up</string>
+    <string name="fav_add_sueeccd">Add succeed</string>
+    <string name="fav_delete_succeed">Delete succeed</string>
+    <string name="drawer_chat">Topic</string>
 
 </resources>

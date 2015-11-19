@@ -43,5 +43,8 @@
     <string name="fav">收藏</string>
     <string name="down">踩</string>
     <string name="up">顶</string>
+    <string name="fav_add_sueeccd">收藏成功</string>
+    <string name="fav_delete_succeed">已取消收藏</string>
+    <string name="drawer_chat">话题</string>
 
 </resources>

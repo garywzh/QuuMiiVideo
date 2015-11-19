@@ -29,6 +29,7 @@ import org.garywzh.quumiibox.common.UserState;
 import org.garywzh.quumiibox.eventbus.LoginEvent;
 import org.garywzh.quumiibox.model.Item;
 import org.garywzh.quumiibox.model.Member;
+import org.garywzh.quumiibox.model.Tag;
 import org.garywzh.quumiibox.ui.adapter.ItemAdapter;
 import org.garywzh.quumiibox.ui.fragment.ItemListFragment;
 
@@ -130,6 +131,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 mLastMenuId = R.id.drawer_image;
                 mDrawerLayout.closeDrawer(mNavigationView);
                 switchFragment(ItemListFragment.newInstance(ItemListFragment.TYPE_IMAGE, null));
+                return true;
+            case R.id.drawer_topic:
+                mLastMenuId = R.id.drawer_topic;
+                mDrawerLayout.closeDrawer(mNavigationView);
+                switchFragment(ItemListFragment.newInstance(ItemListFragment.TYPE_TAG, new Tag(802,"话题")));
                 return true;
             case R.id.drawer_fav:
                 mLastMenuId = R.id.drawer_fav;

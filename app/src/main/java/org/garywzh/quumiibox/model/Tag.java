@@ -10,7 +10,7 @@ public class Tag implements Parcelable {
     private final int mId;
     private final String mName;
 
-    Tag(int id, String name) {
+    public Tag(int id, String name) {
         mId = id;
         mName = name;
     }
