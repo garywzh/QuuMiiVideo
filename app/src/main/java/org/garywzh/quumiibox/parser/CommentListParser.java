@@ -56,11 +56,11 @@ public class CommentListParser extends Parser {
     }
 
     private static void parseContent(Comment.Builder commentBuilder, Element ele){
-        commentBuilder.setContent(ele.select(".message").text());
+        commentBuilder.setContent(ele.select(".message").get(0).text());
     }
 
     private static void parseTime(Comment.Builder commentBuilder, Element ele){
-        commentBuilder.setTime(ele.select("time").text());
+        commentBuilder.setTime(ele.select("time").get(0).text());
     }
 
     private static void parseThumbConut(Comment.Builder commentBuilder, Element ele){
