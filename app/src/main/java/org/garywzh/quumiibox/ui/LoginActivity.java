@@ -16,6 +16,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.umeng.analytics.MobclickAgent;
+
 import org.garywzh.quumiibox.R;
 import org.garywzh.quumiibox.common.UserState;
 import org.garywzh.quumiibox.common.exception.ConnectionException;
@@ -174,6 +176,18 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.LENGTH_LONG).show();
         setResult(RESULT_OK);
         finish();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
     }
 
     /**

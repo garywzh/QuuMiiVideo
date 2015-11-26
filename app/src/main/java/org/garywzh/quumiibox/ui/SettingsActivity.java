@@ -8,6 +8,8 @@ import android.preference.PreferenceFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
+import com.umeng.analytics.MobclickAgent;
+
 import org.garywzh.quumiibox.R;
 import org.garywzh.quumiibox.common.UserState;
 
@@ -32,6 +34,18 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
     }
 
     @Override

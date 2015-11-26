@@ -8,6 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.umeng.analytics.MobclickAgent;
+
 import org.garywzh.quumiibox.R;
 import org.garywzh.quumiibox.model.Item;
 import org.garywzh.quumiibox.model.Member;
@@ -54,5 +56,17 @@ public class TopicActivity extends AppCompatActivity implements CommentAdapter.O
         Intent i = new Intent(Intent.ACTION_VIEW);
         i.setData(Uri.parse(Member.buildUrlFromId(member.getId())));
         startActivity(i);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
     }
 }

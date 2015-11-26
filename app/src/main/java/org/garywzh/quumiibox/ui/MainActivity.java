@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.common.eventbus.Subscribe;
+import com.umeng.analytics.MobclickAgent;
 
 import org.garywzh.quumiibox.AppContext;
 import org.garywzh.quumiibox.BuildConfig;
@@ -208,11 +209,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
+        MobclickAgent.onResume(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        MobclickAgent.onPause(this);
     }
 
     @Override
