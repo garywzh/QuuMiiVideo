@@ -47,6 +47,10 @@ android {
         pre {
             manifestPlaceholders = [UMENG_CHANNEL_VALUE: "pre"]
         }
+
+        firim {
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "firim"]
+        }
     }
 
     compileOptions {
