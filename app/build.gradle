@@ -44,9 +44,6 @@ android {
     }
 
     productFlavors {
-        github {
-            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "github"]
-        }
         pre {
             manifestPlaceholders = [UMENG_CHANNEL_VALUE: "pre"]
         }

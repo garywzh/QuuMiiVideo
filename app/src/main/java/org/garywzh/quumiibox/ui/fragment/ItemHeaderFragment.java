@@ -33,6 +33,9 @@ public class ItemHeaderFragment extends Fragment {
 
     private Item mItem;
     private View headerView;
+    private TextView mThumbUpCountView;
+    private boolean hasUp = false;
+    private boolean hasDown = false;
 
     public ItemHeaderFragment() {
         // Required empty public constructor
@@ -68,7 +71,7 @@ public class ItemHeaderFragment extends Fragment {
         mTiTleView.setText(mItem.getTitle());
         final TextView mTimeView = (TextView) headerView.findViewById(R.id.tv_time);
         mTimeView.setText(mItem.getTime());
-        final TextView mThumbUpCountView = (TextView) headerView.findViewById(R.id.tv_thumbupcount);
+        mThumbUpCountView = (TextView) headerView.findViewById(R.id.tv_thumbupcount);
         mThumbUpCountView.setText(String.valueOf(mItem.getThumbUpCount()));
         final TextView mReplyCountView = (TextView) headerView.findViewById(R.id.tv_replycount);
         mReplyCountView.setText(String.valueOf(mItem.getReplyCount()));
@@ -97,6 +100,24 @@ public class ItemHeaderFragment extends Fragment {
     }
 
     private void onOption(final MenuItem menuItem) {
+
+        switch (menuItem.getItemId()) {
+            case R.id.action_up:
+                if (!hasUp) {
+                    mThumbUpCountView.setText(String.valueOf(Integer.parseInt((String) mThumbUpCountView.getText()) + 1));
+                    hasUp = true;
+                    Toast.makeText(getActivity(), "+1", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case R.id.action_down:
+                if (!hasDown) {
+                    mThumbUpCountView.setText(String.valueOf(Integer.parseInt((String) mThumbUpCountView.getText()) - 1));
+                    hasDown = true;
+                    Toast.makeText(getActivity(), "-1", Toast.LENGTH_SHORT).show();
+                }
+                break;
+        }
+
         AppContext.getEventBus().register(this);
         ExecutorUtils.execute(new Runnable() {
             @Override
@@ -113,6 +134,6 @@ public class ItemHeaderFragment extends Fragment {
     @Subscribe
     public void onUserOptionEvent(UserOptionEvent e) {
         AppContext.getEventBus().unregister(this);
-        Toast.makeText(getActivity(), e.isFavSucceed ? getString(R.string.fav_add_sueeccd): getString(R.string.fav_delete_succeed), Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(), e.isFavSucceed ? getString(R.string.fav_add_sueeccd): getString(R.string.fav_delete_succeed), Toast.LENGTH_SHORT).show();
     }
 }
