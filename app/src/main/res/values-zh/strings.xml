@@ -27,9 +27,11 @@
     <string name="action_comments">评论</string>
     <string name="title_activity_comments">评论</string>
     <string name="title_activity_topic">话题</string>
-    <string name="action_sign_up">Sign up</string>
-    <string name="prompt_account">Account</string>
-    <string name="desc_Quumii">Quumii</string>
+    <string name="action_sign_up">注册</string>
+    <string name="prompt_password">密码</string>
+    <string name="prompt_account">账户</string>
+    <string name="action_login">登录</string>
+    <string name="desc_Quumii">趣觅网，一个寻觅乐趣的地方。</string>
     <string name="toast_login_success">登录成功</string>
     <string name="toast_connection_exception">连接服务器失败</string>
     <string name="toast_remote_exception">返回数据错误</string>

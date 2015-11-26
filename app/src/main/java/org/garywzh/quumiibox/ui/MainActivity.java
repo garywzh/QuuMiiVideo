@@ -191,7 +191,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (!UserState.getInstance().isLoggedIn()) {
             mAvatar.setVisibility(View.INVISIBLE);
             mCredit.setVisibility(View.INVISIBLE);
-            mUsername.setText(R.string.action_sign_in);
+            mUsername.setText(R.string.action_login);
 
             favsMenuItem.setEnabled(false);
             return;

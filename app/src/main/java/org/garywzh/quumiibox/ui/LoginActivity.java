@@ -2,6 +2,8 @@ package org.garywzh.quumiibox.ui;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +26,7 @@ import org.garywzh.quumiibox.common.exception.ConnectionException;
 import org.garywzh.quumiibox.common.exception.FatalException;
 import org.garywzh.quumiibox.common.exception.RemoteException;
 import org.garywzh.quumiibox.model.LoginResult;
+import org.garywzh.quumiibox.model.Member;
 import org.garywzh.quumiibox.network.RequestHelper;
 import org.garywzh.quumiibox.util.LogUtils;
 
@@ -66,8 +69,8 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        Button mSignIn = (Button) findViewById(R.id.sign_in);
-        mSignIn.setOnClickListener(new OnClickListener() {
+        Button mLogin = (Button) findViewById(R.id.login);
+        mLogin.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 attemptLogin();
@@ -76,9 +79,9 @@ public class LoginActivity extends AppCompatActivity {
         findViewById(R.id.sign_up).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-//                final Uri uri = Uri.parse("https://www.v2ex.com/signup?r=aliuwr");
-//                final CustomTabsIntent.Builder builder = CustomTabsHelper.getBuilder(LoginActivity.this, null);
-//                builder.build().launchUrl(LoginActivity.this, uri);
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse("http://www.quumii.com/do.php?ac=5ceffa4024c2df235070de3f6cbaea3b"));
+                startActivity(i);
             }
         });
 
