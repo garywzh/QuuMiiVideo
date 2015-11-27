@@ -14,9 +14,9 @@
 
 ##SCREENSHOTS
 
-<img src="https://raw.githubusercontent.com/garywzh/QuumiiBox/master/screenshots/drawer.jpg" width="216" height="360"/>
-<img src="https://raw.githubusercontent.com/garywzh/QuumiiBox/master/screenshots/home.jpg" width="216" height="360"/>
-<img src="https://raw.githubusercontent.com/garywzh/QuumiiBox/master/screenshots/detail.jpg" width="216" height="360"/>
+<img src="https://raw.githubusercontent.com/garywzh/QuumiiBox/master/screenshots/home.jpg" width="324" height="540"/>
+<img src="https://raw.githubusercontent.com/garywzh/QuumiiBox/master/screenshots/drawer.jpg" width="324" height="540"/>
+<img src="https://raw.githubusercontent.com/garywzh/QuumiiBox/master/screenshots/detail.jpg" width="324" height="540"/>
 
 ##LICENSE
 
