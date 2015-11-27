@@ -12,6 +12,12 @@
 
 *增加TAG分类页面
 
+##SCREENSHOTS
+
+<img src="https://raw.githubusercontent.com/garywzh/QuumiiBox/master/screenshots/drawer.jpg" width="216" height="360"/>
+<img src="https://raw.githubusercontent.com/garywzh/QuumiiBox/master/screenshots/home.jpg" width="216" height="360"/>
+<img src="https://raw.githubusercontent.com/garywzh/QuumiiBox/master/screenshots/detail.jpg" width="216" height="360"/>
+
 ##LICENSE
 
 [Apache License V2](/LICENSE)
