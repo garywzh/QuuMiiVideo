@@ -48,5 +48,8 @@
     <string name="fav_add_sueeccd">收藏成功</string>
     <string name="fav_delete_succeed">已取消收藏</string>
     <string name="drawer_chat">话题</string>
+    <string name="share">分享</string>
+    <string name="send_to">Send to</string>
+    <string name="toast_login_request">请先登录</string>
 
 </resources>

@@ -1,6 +1,7 @@
 package org.garywzh.quumiibox.ui.fragment;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.PopupMenu;
@@ -92,8 +93,8 @@ public class ItemHeaderFragment extends Fragment {
                         }
                     });
                     popup.show();
-                }else {
-                    Toast.makeText(getActivity(), "Please login first!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getActivity(), getString(R.string.toast_login_request), Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -101,39 +102,48 @@ public class ItemHeaderFragment extends Fragment {
 
     private void onOption(final MenuItem menuItem) {
 
-        switch (menuItem.getItemId()) {
-            case R.id.action_up:
-                if (!hasUp) {
-                    mThumbUpCountView.setText(String.valueOf(Integer.parseInt((String) mThumbUpCountView.getText()) + 1));
-                    hasUp = true;
-                    Toast.makeText(getActivity(), "+1", Toast.LENGTH_SHORT).show();
-                }
-                break;
-            case R.id.action_down:
-                if (!hasDown) {
-                    mThumbUpCountView.setText(String.valueOf(Integer.parseInt((String) mThumbUpCountView.getText()) - 1));
-                    hasDown = true;
-                    Toast.makeText(getActivity(), "-1", Toast.LENGTH_SHORT).show();
-                }
-                break;
-        }
-
-        AppContext.getEventBus().register(this);
-        ExecutorUtils.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    RequestHelper.userOperation(mItem, menuItem);
-                } catch (ConnectionException | RemoteException e) {
-                    throw new FatalException(e);
-                }
+        if (menuItem.getItemId() == R.id.action_share) {
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            sendIntent.setType("text/plain");
+            sendIntent.putExtra("Kdescription", mItem.getTitle());
+            sendIntent.putExtra(Intent.EXTRA_TEXT, mItem.getTitle()+" "+Item.buildUrlFromId(mItem.getId()));
+            startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.send_to)));
+        } else {
+            switch (menuItem.getItemId()) {
+                case R.id.action_up:
+                    if (!hasUp) {
+                        mThumbUpCountView.setText(String.valueOf(Integer.parseInt((String) mThumbUpCountView.getText()) + 1));
+                        hasUp = true;
+                        Toast.makeText(getActivity(), "+1", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                case R.id.action_down:
+                    if (!hasDown) {
+                        mThumbUpCountView.setText(String.valueOf(Integer.parseInt((String) mThumbUpCountView.getText()) - 1));
+                        hasDown = true;
+                        Toast.makeText(getActivity(), "-1", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
             }
-        });
+
+            AppContext.getEventBus().register(this);
+            ExecutorUtils.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        RequestHelper.userOperation(mItem, menuItem);
+                    } catch (ConnectionException | RemoteException e) {
+                        throw new FatalException(e);
+                    }
+                }
+            });
+        }
     }
 
     @Subscribe
     public void onUserOptionEvent(UserOptionEvent e) {
         AppContext.getEventBus().unregister(this);
-        Toast.makeText(getActivity(), e.isFavSucceed ? getString(R.string.fav_add_sueeccd): getString(R.string.fav_delete_succeed), Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), e.isFavSucceed ? getString(R.string.fav_add_sueeccd) : getString(R.string.fav_delete_succeed), Toast.LENGTH_SHORT).show();
     }
 }

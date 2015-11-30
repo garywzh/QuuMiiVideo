@@ -112,5 +112,8 @@
     <string name="fav_add_sueeccd">Add succeed</string>
     <string name="fav_delete_succeed">Delete succeed</string>
     <string name="drawer_chat">Topic</string>
+    <string name="share">Share</string>
+    <string name="send_to">Send to</string>
+    <string name="toast_login_request">Please login first !</string>
 
 </resources>
