@@ -14,7 +14,6 @@ import com.squareup.okhttp.Response;
 import org.garywzh.quumiibox.AppContext;
 import org.garywzh.quumiibox.BuildConfig;
 import org.garywzh.quumiibox.R;
-import org.garywzh.quumiibox.common.UserState;
 import org.garywzh.quumiibox.common.exception.ConnectionException;
 import org.garywzh.quumiibox.common.exception.RemoteException;
 import org.garywzh.quumiibox.common.exception.RequestException;
@@ -40,7 +39,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class RequestHelper {
-    public static final String BASE_URL = "http://www.quumii.com";
+    public static final String BASE_URL = "http://www.huojidao.com";
 
     private static final String TAG = RequestHelper.class.getSimpleName();
 
@@ -51,7 +50,7 @@ public class RequestHelper {
 
     private static final String VIDEO_URL_PREFIX = "http://www.quumii.com/videolist/fake.php?blogid=";
 
-    private static final String URL_SIGN_IN = "http://www.quumii.com/do.php?ac=943c400772ea74e9ed9335e02dc786a3&&ref";
+    private static final String URL_SIGN_IN = BASE_URL + "/do.php?ac=943c400772ea74e9ed9335e02dc786a3&&ref";
 
     private static final int SERVER_ERROR_CODE = 500;
 
@@ -85,25 +84,36 @@ public class RequestHelper {
 
         LogUtils.v(TAG, "login user: " + username);
 
+        final Request preLoginRequest = new Request.Builder()
+                .url("http://www.huojidao.com/do.php?ac=943c400772ea74e9ed9335e02dc786a3")
+                .build();
+        Response response = sendRequest(preLoginRequest);
+
         final RequestBody requestBody = new FormEncodingBuilder()
+                .add("utf8", "✓")
+                .add("ok_url", "")
                 .add("username", username)
+                .add("captcha", "")
+                .add("captcha_key", "f7ea5e4ca14fb36aa0d7318b7b040b83d59ba804")
+                .add("verify_code", "")
                 .add("password", password)
                 .add("cookietime", "315360000")
-                .add("refer", "http://www.quumii.com/index.php")
+                .add("refer", "http://www.huojidao.com/index.php")
                 .add("loginsubmit", "登录")
-                .add("formhash", "66a2b842")
+                .add("formhash", "a80b3d4a")
                 .build();
         Request request = new Request.Builder().url(URL_SIGN_IN)
                 .header(HttpHeaders.CACHE_CONTROL, "max-age=0")
-                .header(HttpHeaders.CONTENT_LENGTH, "157")
+                .header(HttpHeaders.CONTENT_LENGTH, "272")
                 .header(HttpHeaders.COOKIE, "uchome_version=0")
-                .header(HttpHeaders.ORIGIN, "http://www.quumii.com")
-                .header(HttpHeaders.REFERER, "http://www.quumii.com/do.php?ac=943c400772ea74e9ed9335e02dc786a3")
+                .header(HttpHeaders.ORIGIN, "http://www.huojidao.com")
+                .header(HttpHeaders.REFERER, "http://www.huojidao.com/do.php?ac=943c400772ea74e9ed9335e02dc786a3")
                 .post(requestBody).build();
-        Response response = sendRequest(request);
+        response = sendRequest(request);
 
         // 登陆成功的话，返回的response的header里的Set-Cookie字段有4个
-        if (response.headers(HttpHeaders.SET_COOKIE).size() != 4) {
+        if (response.headers(HttpHeaders.SET_COOKIE).size() < 4) {
+            LogUtils.d(TAG, "cookie count" + response.headers(HttpHeaders.SET_COOKIE).size());
             LogUtils.d(TAG, "login failed");
             return null;
         }
@@ -111,7 +121,7 @@ public class RequestHelper {
         LogUtils.d(TAG, "login succeed");
 
         final Request homeRequest = new Request.Builder()
-                .url("http://www.quumii.com/itemlist.php")
+                .url(BASE_URL)
                 .build();
         response = sendRequest(homeRequest);
 
@@ -172,7 +182,7 @@ public class RequestHelper {
                 itemListUrl = BASE_URL + "/itemlist-do-tag-id-" + tagId + "-page-" + page + ".html";
                 break;
             case ItemListFragment.TYPE_FAV:
-                itemListUrl = BASE_URL + "/itemlist.php?type=all.0.0." + UserState.getInstance().getId() + ".hot.0.0.0&page=" + page;
+                itemListUrl = BASE_URL + "/itemlist.php?type=trace.0.0.0.hot.0.1.0&page=" + page;
                 break;
             default:
                 throw new RuntimeException("error type");

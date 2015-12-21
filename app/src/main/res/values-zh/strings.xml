@@ -8,9 +8,9 @@
     <string name="action_refresh">刷新</string>
     <string name="developer">开发者</string>
     <string name="introduce">介绍</string>
-    <string name="introduce_detail">趣觅盒子是趣觅网( http://www.quumii.com )的一个第三方Android客户端，由garywzh设计开发，数据来自趣觅网。\n\n作为一个开源软件，程序代码放在github( https://github.com/garywzh/QuumiiBox )上，欢迎大家提出意见或建议。\n\n由于展示效果的原因，来自部分视频源（如秒拍）的视频会转到浏览器播放。</string>
+    <string name="introduce_detail">趣觅盒子是火鸡岛( http://www.huojidao.com )的一个第三方Android客户端，由garywzh设计开发，数据来自趣觅网。\n\n作为一个开源软件，程序代码放在github( https://github.com/garywzh/QuumiiBox )上，欢迎大家提出意见或建议。\n\n由于展示效果的原因，来自部分视频源（如秒拍）的视频会转到浏览器播放。</string>
     <string name="thanks">致谢</string>
-    <string name="thanks_detail">感谢趣觅网( http://www.quumii.com )提供的数据</string>
+    <string name="thanks_detail">感谢火鸡岛( http://www.huojidao.com/ )提供的数据</string>
     <string name="no_comments">暂无评论</string>
     <string name="drawer_home">首页</string>
     <string name="drawer_video">视频</string>
@@ -27,11 +27,12 @@
     <string name="action_comments">评论</string>
     <string name="title_activity_comments">评论</string>
     <string name="title_activity_topic">话题</string>
+    <string name="title_activity_login">登录</string>
     <string name="action_sign_up">注册</string>
     <string name="prompt_password">密码</string>
     <string name="prompt_account">账户</string>
     <string name="action_login">登录</string>
-    <string name="desc_Quumii">趣觅网，一个寻觅乐趣的地方。</string>
+    <string name="desc_Quumii">火鸡岛，好内容分享给每个人。</string>
     <string name="toast_login_success">登录成功</string>
     <string name="toast_connection_exception">连接服务器失败</string>
     <string name="toast_remote_exception">返回数据错误</string>

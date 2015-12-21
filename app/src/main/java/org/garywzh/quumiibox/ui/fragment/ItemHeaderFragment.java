@@ -107,7 +107,7 @@ public class ItemHeaderFragment extends Fragment {
             sendIntent.setAction(Intent.ACTION_SEND);
             sendIntent.setType("text/plain");
             sendIntent.putExtra("Kdescription", mItem.getTitle());
-            sendIntent.putExtra(Intent.EXTRA_TEXT, mItem.getTitle()+" "+Item.buildUrlFromId(mItem.getId()));
+            sendIntent.putExtra(Intent.EXTRA_TEXT, mItem.getTitle() + " " + Item.buildUrlFromId(mItem.getId()));
             startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.send_to)));
         } else {
             switch (menuItem.getItemId()) {

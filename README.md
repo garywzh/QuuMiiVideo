@@ -1,6 +1,6 @@
 # QuumiiBox
 
-趣觅盒子是[趣觅](http://www.quumii.com)的一个第三方客户端，数据来源于趣觅网。
+趣觅盒子是[火鸡岛](http://www.huojidao.com)的一个第三方客户端，数据来源于火鸡岛。
 
 下载应用最新版本请戳 http://fir.im/16ml
 
