@@ -34,6 +34,12 @@
 
     </android.support.design.widget.CoordinatorLayout>
 
+    <org.garywzh.quumiibox.ui.widget.SearchBoxLayout
+        android:id="@+id/search_box"
+        android:visibility="invisible"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <android.support.design.widget.NavigationView
         android:id="@+id/navigationview"
         android:layout_width="wrap_content"

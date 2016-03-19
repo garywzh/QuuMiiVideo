@@ -119,5 +119,6 @@
     <string name="action_add">Add</string>
     <string name="action_delete">Delete</string>
     <string name="action_reset">Reset</string>
+    <string name="action_search">Search</string>
 
 </resources>

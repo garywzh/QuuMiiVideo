@@ -33,6 +33,7 @@ import org.garywzh.quumiibox.ui.adapter.CategoryAdapter;
 import org.garywzh.quumiibox.ui.adapter.ItemAdapter;
 import org.garywzh.quumiibox.ui.fragment.CategoryFragment;
 import org.garywzh.quumiibox.ui.fragment.ItemListFragment;
+import org.garywzh.quumiibox.ui.widget.SearchBoxLayout;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ItemAdapter.OnItemActionListener, CategoryAdapter.OnCateItemClickListener {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
     public Toolbar mToolbar;
+    private SearchBoxLayout mSearchBox;
     private ImageView mAvatar;
     private TextView mUsername;
     private TextView mCredit;
@@ -54,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mNavigationView = (NavigationView) findViewById(R.id.navigationview);
         initToolbar();
         initNavDrawer();
+        initSearchBox();
         switchFragment(ItemListFragment.newInstance(ItemListFragment.TYPE_ALL, null), false);
     }
 
@@ -92,6 +95,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         };
         mAvatar.setOnClickListener(onClickListener);
         mUsername.setOnClickListener(onClickListener);
+    }
+
+    private void initSearchBox() {
+        mSearchBox = (SearchBoxLayout) findViewById(R.id.search_box);
+        mSearchBox.setOnActionListener(new SearchBoxLayout.Listener() {
+            @Override
+            public void onQueryTextSubmit(String query) {
+                mSearchBox.hide();
+                if (query.trim().length() == 0) {
+                    return;
+                }
+                switchFragment(ItemListFragment.newInstance(ItemListFragment.TYPE_SEARCH, query.trim()));
+            }
+        });
     }
 
     @Override
@@ -190,6 +207,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onStop() {
         super.onStop();
+        if (mSearchBox.getVisibility() == View.VISIBLE) {
+            mSearchBox.hide();
+        }
         AppContext.getEventBus().unregister(this);
     }
 
@@ -199,6 +219,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mDrawerLayout.closeDrawer(mNavigationView);
             return;
         }
+
+        if (mSearchBox.getVisibility() == View.VISIBLE) {
+            mSearchBox.hide();
+            return;
+        }
+
         super.onBackPressed();
     }
 
@@ -207,6 +233,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
         if (id == android.R.id.home) {
             mDrawerLayout.openDrawer(mNavigationView);
+            return true;
+        } else if (id == R.id.action_web_search) {
+            mSearchBox.show();
             return true;
         }
         return super.onOptionsItemSelected(item);
