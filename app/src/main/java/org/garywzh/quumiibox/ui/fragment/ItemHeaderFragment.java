@@ -20,8 +20,10 @@ import org.garywzh.quumiibox.common.UserState;
 import org.garywzh.quumiibox.common.exception.ConnectionException;
 import org.garywzh.quumiibox.common.exception.FatalException;
 import org.garywzh.quumiibox.common.exception.RemoteException;
-import org.garywzh.quumiibox.eventbus.UserOptionEvent;
+import org.garywzh.quumiibox.eventbus.UserOperationEvent;
 import org.garywzh.quumiibox.model.Item;
+import org.garywzh.quumiibox.model.OperatInfo;
+import org.garywzh.quumiibox.model.UserOperation;
 import org.garywzh.quumiibox.network.RequestHelper;
 import org.garywzh.quumiibox.util.ExecutorUtils;
 
@@ -35,8 +37,6 @@ public class ItemHeaderFragment extends Fragment {
     private Item mItem;
     private View headerView;
     private TextView mThumbUpCountView;
-    private boolean hasUp = false;
-    private boolean hasDown = false;
 
     public ItemHeaderFragment() {
         // Required empty public constructor
@@ -53,6 +53,7 @@ public class ItemHeaderFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
         if (getArguments() != null) {
             mItem = getArguments().getParcelable(ARG_ITEM);
         }
@@ -69,13 +70,13 @@ public class ItemHeaderFragment extends Fragment {
 
     private void initHeaderView() {
         final TextView mTiTleView = (TextView) headerView.findViewById(R.id.tv_title);
-        mTiTleView.setText(mItem.getTitle());
+        mTiTleView.setText(mItem.subject);
         final TextView mTimeView = (TextView) headerView.findViewById(R.id.tv_time);
-        mTimeView.setText(mItem.getTime());
+        mTimeView.setText(mItem.dateline);
         mThumbUpCountView = (TextView) headerView.findViewById(R.id.tv_thumbupcount);
-        mThumbUpCountView.setText(String.valueOf(mItem.getThumbUpCount()));
+        mThumbUpCountView.setText(mItem.like);
         final TextView mReplyCountView = (TextView) headerView.findViewById(R.id.tv_replycount);
-        mReplyCountView.setText(String.valueOf(mItem.getReplyCount()));
+        mReplyCountView.setText(mItem.replynum);
 
         final View thumUpView = headerView.findViewById(R.id.thumbup_view);
         thumUpView.setOnClickListener(new View.OnClickListener() {
@@ -87,7 +88,6 @@ public class ItemHeaderFragment extends Fragment {
 
                     popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                         public boolean onMenuItemClick(MenuItem item) {
-
                             onOption(item);
                             return true;
                         }
@@ -101,32 +101,14 @@ public class ItemHeaderFragment extends Fragment {
     }
 
     private void onOption(final MenuItem menuItem) {
-
         if (menuItem.getItemId() == R.id.action_share) {
             Intent sendIntent = new Intent();
             sendIntent.setAction(Intent.ACTION_SEND);
             sendIntent.setType("text/plain");
-            sendIntent.putExtra("Kdescription", mItem.getTitle());
-            sendIntent.putExtra(Intent.EXTRA_TEXT, mItem.getTitle() + " " + Item.buildUrlFromId(mItem.getId()));
+            sendIntent.putExtra("Kdescription", mItem.subject);
+            sendIntent.putExtra(Intent.EXTRA_TEXT, mItem.subject + " " + Item.buildUrlFromBlogid(mItem.blogid));
             startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.send_to)));
         } else {
-            switch (menuItem.getItemId()) {
-                case R.id.action_up:
-                    if (!hasUp) {
-                        mThumbUpCountView.setText(String.valueOf(Integer.parseInt((String) mThumbUpCountView.getText()) + 1));
-                        hasUp = true;
-                        Toast.makeText(getActivity(), "+1", Toast.LENGTH_SHORT).show();
-                    }
-                    break;
-                case R.id.action_down:
-                    if (!hasDown) {
-                        mThumbUpCountView.setText(String.valueOf(Integer.parseInt((String) mThumbUpCountView.getText()) - 1));
-                        hasDown = true;
-                        Toast.makeText(getActivity(), "-1", Toast.LENGTH_SHORT).show();
-                    }
-                    break;
-            }
-
             AppContext.getEventBus().register(this);
             ExecutorUtils.execute(new Runnable() {
                 @Override
@@ -142,8 +124,22 @@ public class ItemHeaderFragment extends Fragment {
     }
 
     @Subscribe
-    public void onUserOptionEvent(UserOptionEvent e) {
+    public void onUserOptionEvent(UserOperationEvent e) {
         AppContext.getEventBus().unregister(this);
-        Toast.makeText(getActivity(), e.isFavSucceed ? getString(R.string.fav_add_sueeccd) : getString(R.string.fav_delete_succeed), Toast.LENGTH_SHORT).show();
+        if (e.message.contains(OperatInfo.MESSAGE_OK)) {
+            switch (e.type) {
+                case UserOperation.TYPE_LIKE:
+                    mThumbUpCountView.setText(String.valueOf(Integer.parseInt((String) mThumbUpCountView.getText()) + 1));
+                    break;
+                case UserOperation.TYPE_UNLIKE:
+                    mThumbUpCountView.setText(String.valueOf(Integer.parseInt((String) mThumbUpCountView.getText()) - 1));
+                    break;
+            }
+            Toast.makeText(getActivity(), getString(R.string.sueeccd), Toast.LENGTH_SHORT).show();
+        } else if (e.message.contains(OperatInfo.MESSAGE_ALREADY)) {
+            Toast.makeText(getActivity(), getString(R.string.already), Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getActivity(), e.message, Toast.LENGTH_SHORT).show();
+        }
     }
 }

@@ -10,12 +10,12 @@ import java.util.List;
 public class ItemListLoader extends AsyncTaskLoader<List<Item>> {
     private int mCount = 1;
     private int mType;
-    private int mTagId;
+    private String mQueryString;
 
-    public ItemListLoader(Context context, int type, int tagId) {
+    public ItemListLoader(Context context, int type, String query) {
         super(context);
         mType = type;
-        mTagId = tagId;
+        mQueryString = query;
     }
 
     public void setPage(int count) {
@@ -25,6 +25,6 @@ public class ItemListLoader extends AsyncTaskLoader<List<Item>> {
 
     @Override
     public List<Item> loadInBackgroundWithException() throws Exception {
-        return RequestHelper.getMutiPageItemsByCount(mType, mTagId, mCount);
+        return RequestHelper.getItemsByTypeByPage(mType, mQueryString, mCount);
     }
 }

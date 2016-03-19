@@ -7,21 +7,9 @@
             android:icon="@drawable/ic_explore_black_24dp"
             android:title="@string/drawer_home" />
         <item
-            android:id="@+id/drawer_video"
-            android:icon="@drawable/ic_videocam_black_24dp"
-            android:title="@string/drawer_video" />
-        <item
-            android:id="@+id/drawer_image"
-            android:icon="@drawable/ic_photo_black_24dp"
-            android:title="@string/drawer_image" />
-        <item
-            android:id="@+id/drawer_topic"
-            android:icon="@drawable/ic_chat_black_24dp"
-            android:title="@string/drawer_chat" />
-        <item
-            android:id="@+id/drawer_fav"
-            android:icon="@drawable/ic_favorite_black_24dp"
-            android:title="@string/drawer_fav"/>
+            android:id="@+id/drawer_category"
+            android:icon="@drawable/ic_whatshot_black_24dp"
+            android:title="@string/drawer_tag" />
     </group>
 
     <group

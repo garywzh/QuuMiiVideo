@@ -13,7 +13,7 @@
     <string name="thanks_detail">感谢火鸡岛( http://www.huojidao.com/ )提供的数据</string>
     <string name="no_comments">暂无评论</string>
     <string name="drawer_home">首页</string>
-    <string name="drawer_video">视频</string>
+    <string name="drawer_tag">标签</string>
     <string name="drawer_feedback">反馈</string>
     <string name="action_settings">设置</string>
     <string name="drawer_about">关于</string>
@@ -40,17 +40,21 @@
     <string name="pref_category_general">基本</string>
     <string name="pref_category_user">用户</string>
     <string name="pref_login">登录</string>
-    <string name="pref_logout">退出</string>
+    <string name="pref_logout">登出</string>
     <string name="action_fav">收藏</string>
     <string name="drawer_fav">收藏</string>
     <string name="fav">收藏</string>
     <string name="down">踩</string>
     <string name="up">顶</string>
-    <string name="fav_add_sueeccd">收藏成功</string>
-    <string name="fav_delete_succeed">已取消收藏</string>
+    <string name="sueeccd">成功</string>
+    <string name="failed">失败</string>
     <string name="drawer_chat">话题</string>
     <string name="share">分享</string>
     <string name="send_to">Send to</string>
     <string name="toast_login_request">请先登录</string>
+    <string name="already">无需重复操作</string>
+    <string name="action_add">添加</string>
+    <string name="action_delete">删除</string>
+    <string name="action_reset">重置</string>
 
 </resources>

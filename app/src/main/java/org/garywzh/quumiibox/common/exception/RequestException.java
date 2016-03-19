@@ -2,7 +2,8 @@ package org.garywzh.quumiibox.common.exception;
 
 import com.google.common.base.Strings;
 import com.google.common.net.HttpHeaders;
-import com.squareup.okhttp.Response;
+
+import okhttp3.Response;
 
 public class RequestException extends RuntimeException {
     private final Response mResponse;

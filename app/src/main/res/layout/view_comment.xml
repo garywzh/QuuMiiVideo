@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
     android:paddingTop="8dp"
@@ -14,7 +14,7 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         tools:src="@drawable/avatar_default"
-        android:contentDescription="@string/desc_avatar"/>
+        android:contentDescription="@string/desc_avatar" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -28,7 +28,7 @@
         android:ellipsize="end"
         android:layout_alignTop="@id/avatar_img"
         android:layout_toEndOf="@id/avatar_img"
-        android:layout_toRightOf="@id/avatar_img"/>
+        android:layout_toRightOf="@id/avatar_img" />
 
     <TextView
         android:layout_width="match_parent"
@@ -49,6 +49,6 @@
         style="@style/Comment.Time"
         android:layout_below="@id/content_tv"
         android:layout_alignStart="@id/tv_username"
-        android:layout_alignLeft="@id/tv_username"        />
+        android:layout_alignLeft="@id/tv_username" />
 
 </RelativeLayout>

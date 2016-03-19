@@ -1,18 +1,14 @@
 package org.garywzh.quumiibox.ui;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
-import android.widget.TextView;
 
 import com.umeng.analytics.MobclickAgent;
 
 import org.garywzh.quumiibox.R;
 import org.garywzh.quumiibox.model.Item;
-import org.garywzh.quumiibox.model.Member;
 import org.garywzh.quumiibox.ui.adapter.CommentAdapter;
 import org.garywzh.quumiibox.ui.fragment.CommentListFragment;
 import org.garywzh.quumiibox.ui.fragment.ItemHeaderFragment;
@@ -32,7 +28,7 @@ public class TopicActivity extends AppCompatActivity implements CommentAdapter.O
         mItem = getIntent().getExtras().getParcelable("item");
 
         final Fragment itemHeaderFragment = ItemHeaderFragment.newInstance(mItem);
-        final Fragment commentListFragment = CommentListFragment.newInstance(mItem.getId());
+        final Fragment commentListFragment = CommentListFragment.newInstance(mItem.blogid);
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.headerview, itemHeaderFragment)
@@ -52,10 +48,7 @@ public class TopicActivity extends AppCompatActivity implements CommentAdapter.O
     }
 
     @Override
-    public void onMemberClick(Member member) {
-        Intent i = new Intent(Intent.ACTION_VIEW);
-        i.setData(Uri.parse(Member.buildUrlFromId(member.getId())));
-        startActivity(i);
+    public void onMemberClick() {
     }
 
     @Override

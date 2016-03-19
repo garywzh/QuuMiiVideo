@@ -17,11 +17,6 @@ import java.util.List;
 
 public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private static final int TYPE_VIDEO = 0;
-    private static final int TYPE_IMAGE = 1;
-    private static final int TYPE_TOPIC = 2;
-    private static final int TYPE_NEWS = 3;
-
     private final OnItemActionListener mListener;
     private List<Item> mData;
 
@@ -38,18 +33,15 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        if (viewType == TYPE_VIDEO) {
+        if (viewType == Item.TYPE_VIDEO) {
             final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_video, parent, false);
             return new VideoViewHolder(mListener, view);
-        } else if (viewType == TYPE_IMAGE) {
-            final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_image, parent, false);
+        } else if (viewType == Item.TYPE_PIC | viewType == Item.TYPE_LONGPIC | viewType == Item.TYPE_GIF) {
+            final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_pic, parent, false);
             return new ImageViewHolder(mListener, view);
-        } else if (viewType == TYPE_TOPIC) {
-            final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_topic, parent, false);
+        } else if (viewType == Item.TYPE_LINK | viewType == Item.TYPE_TUJI | viewType == Item.TYPE_DUANZI) {
+            final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_link, parent, false);
             return new TopicViewHolder(mListener, view);
-        } else if (viewType == TYPE_NEWS) {
-            final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_video, parent, false);
-            return new VideoViewHolder(mListener, view);
         }
 
         throw new RuntimeException("there is no type that matches the type " + viewType + " + make sure your using types correctly");
@@ -69,7 +61,7 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public long getItemId(int position) {
-        return mData == null ? RecyclerView.NO_ID : mData.get(position).getId();
+        return mData == null ? RecyclerView.NO_ID : Integer.parseInt(mData.get(position).blogid);
     }
 
     @Override
@@ -81,18 +73,27 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public int getItemViewType(int position) {
         int type;
 
-        switch (mData.get(position).getType()) {
-            case VIDEO:
-                type = TYPE_VIDEO;
+        switch (mData.get(position).type) {
+            case "video":
+                type = Item.TYPE_VIDEO;
                 break;
-            case IMAGE:
-                type = TYPE_IMAGE;
+            case "pic":
+                type = Item.TYPE_PIC;
                 break;
-            case TOPIC:
-                type = TYPE_TOPIC;
+            case "longpic":
+                type = Item.TYPE_LONGPIC;
                 break;
-            case NEWS:
-                type = TYPE_NEWS;
+            case "gif":
+                type = Item.TYPE_GIF;
+                break;
+            case "link":
+                type = Item.TYPE_LINK;
+                break;
+            case "duanzi":
+                type = Item.TYPE_DUANZI;
+                break;
+            case "tuji":
+                type = Item.TYPE_TUJI;
                 break;
             default:
                 throw new RuntimeException("unknown type");
@@ -135,16 +136,16 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
             mItem = item;
 
-            mTitle.setText(item.getTitle());
-            mTime.setText(item.getTime());
-            mThumbUpCount.setText(String.valueOf(item.getThumbUpCount()));
-            mReplyCount.setText(String.valueOf(item.getReplyCount()));
+            mTitle.setText(item.subject);
+            mTime.setText(item.dateline);
+            mThumbUpCount.setText(item.like);
+            mReplyCount.setText(item.replynum);
 
             setCoverPic(item);
         }
 
         private void setCoverPic(Item item) {
-            final String url = Item.buildCoverPicUrlFromId(item.getId());
+            final String url = item.img;
             Glide.with(mCoverPic.getContext()).load(url)
                     .placeholder(R.drawable.coverpic_default).crossFade()
                     .into(mCoverPic);
@@ -194,16 +195,16 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
             mItem = item;
 
-            mTitle.setText(item.getTitle());
-            mTime.setText(item.getTime());
-            mThumbUpCount.setText(String.valueOf(item.getThumbUpCount()));
-            mReplyCount.setText(String.valueOf(item.getReplyCount()));
+            mTitle.setText(item.subject);
+            mTime.setText(item.dateline);
+            mThumbUpCount.setText(item.like);
+            mReplyCount.setText(item.replynum);
 
             setCoverPic(item);
         }
 
         private void setCoverPic(Item item) {
-            final String url = Item.buildCoverPicUrlFromId(item.getId());
+            final String url = item.img;
             Glide.with(mCoverPic.getContext()).load(url)
                     .placeholder(R.drawable.coverpic_default).crossFade()
                     .into(mCoverPic);
@@ -251,11 +252,10 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
             mItem = item;
 
-            mTitle.setText(item.getTitle());
-            mTime.setText(item.getTime());
-            mThumbUpCount.setText(String.valueOf(item.getThumbUpCount()));
-            mReplyCount.setText(String.valueOf(item.getReplyCount()));
-
+            mTitle.setText(item.subject);
+            mTime.setText(item.dateline);
+            mThumbUpCount.setText(item.like);
+            mReplyCount.setText(item.replynum);
         }
 
         @Override

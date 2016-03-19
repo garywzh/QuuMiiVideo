@@ -26,14 +26,13 @@ import org.garywzh.quumiibox.common.exception.ConnectionException;
 import org.garywzh.quumiibox.common.exception.FatalException;
 import org.garywzh.quumiibox.common.exception.RemoteException;
 import org.garywzh.quumiibox.model.LoginResult;
-import org.garywzh.quumiibox.model.Member;
 import org.garywzh.quumiibox.network.RequestHelper;
 import org.garywzh.quumiibox.util.LogUtils;
 
 /**
  * A login screen that offers login via email/password.
  */
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity implements OnClickListener {
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
@@ -71,34 +70,39 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         Button mLogin = (Button) findViewById(R.id.login);
-        mLogin.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                attemptLogin();
-            }
-        });
-        findViewById(R.id.sign_up).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setData(Uri.parse("http://www.quumii.com/do.php?ac=5ceffa4024c2df235070de3f6cbaea3b"));
-                startActivity(i);
-            }
-        });
 
+        if (mLogin != null) {
+            mLogin.setOnClickListener(this);
+        }
+        View signUp = findViewById(R.id.sign_up);
+        if (signUp != null) {
+            signUp.setOnClickListener(this);
+        }
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
     }
 
     @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.login:
+                attemptLogin();
+                break;
+            case R.id.sign_up:
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse("http://www.huoji.tv/do.php?ac=943c400772ea74e9ed9335e02dc786a3"));
+                startActivity(i);
+                break;
+        }
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-
         if (id == android.R.id.home) {
             onBackPressed();
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -111,32 +115,26 @@ public class LoginActivity extends AppCompatActivity {
         if (mAuthTask != null) {
             return;
         }
-
         // Reset errors.
         mAccountView.setError(null);
         mPwdView.setError(null);
-
         // Store values at the time of the login attempt.
         String email = mAccountView.getText().toString();
         String password = mPwdView.getText().toString();
-
         boolean cancel = false;
         View focusView = null;
-
         // Check for a valid password, if the user entered one.
         if (TextUtils.isEmpty(password)) {
             mPwdView.setError(getString(R.string.error_field_required));
             focusView = mPwdView;
             cancel = true;
         }
-
         // Check for a valid email address.
         if (TextUtils.isEmpty(email)) {
             mAccountView.setError(getString(R.string.error_field_required));
             focusView = mAccountView;
             cancel = true;
         }
-
         if (cancel) {
             // There was an error; don't attempt login and focus the first
             // form field with an error.
@@ -176,7 +174,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void onLoginSuccess(String username) {
-        Toast.makeText(this, getString(R.string.toast_login_success, username),
+        Toast.makeText(this, getString(R.string.toast_login_success) + " " + username,
                 Toast.LENGTH_LONG).show();
         setResult(RESULT_OK);
         finish();
@@ -200,7 +198,6 @@ public class LoginActivity extends AppCompatActivity {
      */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
         private final String TAG = UserLoginTask.class.getSimpleName();
-
         private final String mUsername;
         private final String mPassword;
         private Exception mException;
@@ -221,7 +218,6 @@ public class LoginActivity extends AppCompatActivity {
             } catch (ConnectionException | RemoteException e) {
                 mException = e;
             }
-
             return false;
         }
 
@@ -234,13 +230,11 @@ public class LoginActivity extends AppCompatActivity {
                 onLoginSuccess(mUsername);
                 return;
             }
-
             if (mException == null) {
                 LoginActivity.this.mPwdView.setError(getString(R.string.error_incorrect_password));
                 LoginActivity.this.mPwdView.requestFocus();
                 return;
             }
-
             LogUtils.w(TAG, "login failed", mException);
 
             int resId;
@@ -251,7 +245,6 @@ public class LoginActivity extends AppCompatActivity {
             } else {
                 throw new FatalException(mException);
             }
-
             Toast.makeText(LoginActivity.this, resId, Toast.LENGTH_LONG).show();
         }
 
