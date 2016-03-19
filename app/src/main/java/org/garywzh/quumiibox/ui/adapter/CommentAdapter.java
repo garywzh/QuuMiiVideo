@@ -12,7 +12,6 @@ import com.bumptech.glide.Glide;
 
 import org.garywzh.quumiibox.R;
 import org.garywzh.quumiibox.model.Comment;
-import org.garywzh.quumiibox.model.Member;
 
 import java.util.List;
 
@@ -44,7 +43,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
 
     @Override
     public long getItemId(int position) {
-        return mData == null ? RecyclerView.NO_ID : mData.get(position).getId();
+        return mData == null ? RecyclerView.NO_ID : Integer.parseInt(mData.get(position).cid);
     }
 
     @Override
@@ -85,11 +84,11 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
             }
             mComment = comment;
 
-            mUsername.setText(comment.getMember().getName());
-            mContent.setText(comment.getContent());
-            mReplyTime.setText(comment.getTime());
+            mUsername.setText(comment.author);
+            mContent.setText(comment.message);
+            mReplyTime.setText(comment.dateline);
 
-            Glide.with(mAvatar.getContext()).load(comment.getMember().getAvatar())
+            Glide.with(mAvatar.getContext()).load(comment.avatar)
                     .placeholder(R.drawable.avatar_default).crossFade()
                     .into(mAvatar);
         }
@@ -97,12 +96,12 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
         @Override
         public void onClick(View v) {
             if (v == mAvatar) {
-                mListener.onMemberClick(mComment.getMember());
+//                mListener.onMemberClick(mComment.getMember());
             }
         }
     }
 
     public interface OnCommentActionListener {
-        void onMemberClick(Member member);
+        void onMemberClick();
     }
 }

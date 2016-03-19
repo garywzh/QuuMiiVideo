@@ -10,7 +10,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -29,20 +28,19 @@ import org.garywzh.quumiibox.R;
 import org.garywzh.quumiibox.common.UserState;
 import org.garywzh.quumiibox.eventbus.LoginEvent;
 import org.garywzh.quumiibox.model.Item;
-import org.garywzh.quumiibox.model.Member;
-import org.garywzh.quumiibox.model.Tag;
+import org.garywzh.quumiibox.model.UserInfo;
+import org.garywzh.quumiibox.ui.adapter.CategoryAdapter;
 import org.garywzh.quumiibox.ui.adapter.ItemAdapter;
+import org.garywzh.quumiibox.ui.fragment.CategoryFragment;
 import org.garywzh.quumiibox.ui.fragment.ItemListFragment;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ItemAdapter.OnItemActionListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ItemAdapter.OnItemActionListener, CategoryAdapter.OnCateItemClickListener {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
-    private ActionBarDrawerToggle mDrawerToggle;
-    private Toolbar mToolbar;
+    public Toolbar mToolbar;
     private ImageView mAvatar;
-    private MenuItem favsMenuItem;
     private TextView mUsername;
     private TextView mCredit;
     @IdRes
@@ -52,14 +50,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mNavigationView = (NavigationView) findViewById(R.id.navigationview);
-
         initToolbar();
         initNavDrawer();
-
-        switchFragment(ItemListFragment.newInstance(ItemListFragment.TYPE_HOME, null));
+        switchFragment(ItemListFragment.newInstance(ItemListFragment.TYPE_ALL, null), false);
     }
 
     private void initToolbar() {
@@ -68,15 +63,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return;
         }
         setSupportActionBar(mToolbar);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     private void initNavDrawer() {
         mLastMenuId = R.id.drawer_home;
         mNavigationView.setNavigationItemSelectedListener(this);
-
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar,
-                R.string.desc_open_drawer, R.string.desc_close_drawer);
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
 
         /*Version 23.1.0 改变了navigationview的实现，xml布局无法直接通过findviewbyid获取到headerview，
         所以需要动态添加header*/
@@ -92,22 +85,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     startActivity(new Intent(MainActivity.this, LoginActivity.class));
                 } else {
                     Intent i = new Intent(Intent.ACTION_VIEW);
-                    i.setData(Uri.parse(Member.buildUrlFromId(UserState.getInstance().getId())));
+                    i.setData(Uri.parse(UserInfo.buildUrlFormUid(UserState.getInstance().getId())));
                     startActivity(i);
                 }
             }
         };
         mAvatar.setOnClickListener(onClickListener);
         mUsername.setOnClickListener(onClickListener);
-
-        favsMenuItem = mNavigationView.getMenu().findItem(R.id.drawer_fav);
-    }
-
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-
-        mDrawerToggle.syncState();
     }
 
     @Override
@@ -116,32 +100,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (itemId == mLastMenuId) {
             return false;
         }
-
         switch (itemId) {
             case R.id.drawer_home:
                 mLastMenuId = R.id.drawer_home;
                 mDrawerLayout.closeDrawer(mNavigationView);
-                switchFragment(ItemListFragment.newInstance(ItemListFragment.TYPE_HOME, null));
+                getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 return true;
-            case R.id.drawer_video:
-                mLastMenuId = R.id.drawer_video;
+            case R.id.drawer_category:
+                mLastMenuId = R.id.drawer_category;
                 mDrawerLayout.closeDrawer(mNavigationView);
-                switchFragment(ItemListFragment.newInstance(ItemListFragment.TYPE_VIDEO, null));
-                return true;
-            case R.id.drawer_image:
-                mLastMenuId = R.id.drawer_image;
-                mDrawerLayout.closeDrawer(mNavigationView);
-                switchFragment(ItemListFragment.newInstance(ItemListFragment.TYPE_IMAGE, null));
-                return true;
-            case R.id.drawer_topic:
-                mLastMenuId = R.id.drawer_topic;
-                mDrawerLayout.closeDrawer(mNavigationView);
-                switchFragment(ItemListFragment.newInstance(ItemListFragment.TYPE_TAG, new Tag(802,"话题")));
-                return true;
-            case R.id.drawer_fav:
-                mLastMenuId = R.id.drawer_fav;
-                mDrawerLayout.closeDrawer(mNavigationView);
-                switchFragment(ItemListFragment.newInstance(ItemListFragment.TYPE_FAV, null));
+                switchFragment(CategoryFragment.newInstance());
                 return true;
             case R.id.drawer_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
@@ -161,7 +129,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 startActivity(new Intent(this, AboutActivity.class));
                 return true;
         }
-
         return false;
     }
 
@@ -171,11 +138,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void switchFragment(Fragment fragment) {
+        switchFragment(fragment, true);
+    }
+
+    private void switchFragment(Fragment fragment, boolean addToBackStack) {
         final FragmentManager fragmentManager = getSupportFragmentManager();
         final FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.setCustomAnimations(R.anim.abc_fade_in, R.anim.abc_fade_out,
                 R.anim.abc_fade_in, R.anim.abc_fade_out)
-                .replace(R.id.fragment, fragment);
+                .replace(R.id.content, fragment);
+        if (addToBackStack) {
+            fragmentTransaction.addToBackStack(null);
+        }
         fragmentTransaction.commit();
         invalidateOptionsMenu();
     }
@@ -192,18 +166,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mAvatar.setVisibility(View.INVISIBLE);
             mCredit.setVisibility(View.INVISIBLE);
             mUsername.setText(R.string.action_login);
-
-            favsMenuItem.setEnabled(false);
             return;
         }
-
         mAvatar.setVisibility(View.VISIBLE);
         mCredit.setVisibility(View.VISIBLE);
         Glide.with(this).load(UserState.getInstance().getAvatar()).crossFade().into(mAvatar);
         mUsername.setText(UserState.getInstance().getUsername());
         mCredit.setText(String.valueOf(UserState.getInstance().getCredit()));
-
-        favsMenuItem.setEnabled(true);
     }
 
     @Override
@@ -224,36 +193,75 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         AppContext.getEventBus().unregister(this);
     }
 
+    @Override
+    public void onBackPressed() {
+        if (mDrawerLayout.isDrawerOpen(mNavigationView)) {
+            mDrawerLayout.closeDrawer(mNavigationView);
+            return;
+        }
+        super.onBackPressed();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            mDrawerLayout.openDrawer(mNavigationView);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     @Subscribe
     public void onLoginEvent(LoginEvent e) {
         updateNavView();
     }
 
+
+    @Override
+    public void onCateItemClick(String item) {
+        switchFragment(ItemListFragment.newInstance(ItemListFragment.TYPE_SEARCH, item));
+    }
+
     @Override
     public boolean onItemOpen(View view, Item item) {
         final Intent intent;
-        switch (item.getType()) {
-            case VIDEO:
+        switch (item.type) {
+            case "video":
                 intent = new Intent(this, VideoActivity.class);
                 Bundle VideoBundle = new Bundle();
                 VideoBundle.putParcelable("item", item);
                 intent.putExtras(VideoBundle);
                 break;
-            case IMAGE:
+            case "pic":
                 intent = new Intent(this, ImageActivity.class);
-                Bundle ImageBundle = new Bundle();
-                ImageBundle.putParcelable("item", item);
-                intent.putExtras(ImageBundle);
+                Bundle PicBundle = new Bundle();
+                PicBundle.putParcelable("item", item);
+                intent.putExtras(PicBundle);
                 break;
-            case TOPIC:
+            case "longpic":
+                intent = new Intent(this, ImageActivity.class);
+                Bundle LongPicBundle = new Bundle();
+                LongPicBundle.putParcelable("item", item);
+                intent.putExtras(LongPicBundle);
+                break;
+            case "gif":
+                intent = new Intent(this, ImageActivity.class);
+                Bundle GifBundle = new Bundle();
+                GifBundle.putParcelable("item", item);
+                intent.putExtras(GifBundle);
+                break;
+            case "link":
                 intent = new Intent(this, TopicActivity.class);
                 Bundle TopicBundle = new Bundle();
                 TopicBundle.putParcelable("item", item);
                 intent.putExtras(TopicBundle);
                 break;
-            case NEWS:
-                intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse(item.getinfoBasedType()));
+            case "duanzi":
+                intent = new Intent(this, TopicActivity.class);
+                Bundle DuanziBundle = new Bundle();
+                DuanziBundle.putParcelable("item", item);
+                intent.putExtras(DuanziBundle);
                 break;
             default:
                 throw new RuntimeException("unknown type");

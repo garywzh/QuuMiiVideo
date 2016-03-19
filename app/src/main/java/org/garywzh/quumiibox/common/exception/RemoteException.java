@@ -1,6 +1,6 @@
 package org.garywzh.quumiibox.common.exception;
 
-import com.squareup.okhttp.Response;
+import okhttp3.Response;
 
 public class RemoteException extends Exception {
     public RemoteException(Response response) {

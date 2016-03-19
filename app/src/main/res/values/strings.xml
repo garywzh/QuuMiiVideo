@@ -15,7 +15,7 @@
     <string name="thanks_detail">Thanks to www.huojidao.com for offering those useful data.</string>
     <string name="no_comments">No comments</string>
     <string name="drawer_home">Home</string>
-    <string name="drawer_video">Video</string>
+    <string name="drawer_tag">Tag</string>
     <string name="drawer_feedback">feedback</string>
     <string name="action_settings">Settings</string>
     <string name="drawer_about">About</string>
@@ -109,11 +109,15 @@
     <string name="fav">Favorite</string>
     <string name="down">Down</string>
     <string name="up">Up</string>
-    <string name="fav_add_sueeccd">Add succeed</string>
-    <string name="fav_delete_succeed">Delete succeed</string>
+    <string name="sueeccd">Succeed</string>
+    <string name="failed">Failed</string>
     <string name="drawer_chat">Topic</string>
     <string name="share">Share</string>
     <string name="send_to">Send to</string>
     <string name="toast_login_request">Please login first !</string>
+    <string name="already">already</string>
+    <string name="action_add">Add</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_reset">Reset</string>
 
 </resources>

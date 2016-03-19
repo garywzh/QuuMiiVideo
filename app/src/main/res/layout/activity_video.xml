@@ -1,25 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
     android:fitsSystemWindows="true"
     tools:context="org.garywzh.quumiibox.ui.VideoActivity">
 
-    <WebView
+    <FrameLayout
+        android:id="@+id/video_root"
+        android:focusable="true"
         android:layout_width="match_parent"
-        android:layout_height="202.5dp"
-        android:id="@+id/webview"
-        android:layerType="hardware" />
+        android:layout_height="wrap_content"
+        android:background="@color/black"
+        android:keepScreenOn="true">
+
+        <com.google.android.exoplayer.AspectRatioFrameLayout
+            android:id="@+id/video_frame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center">
+
+            <SurfaceView
+                android:id="@+id/surface_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center" />
+
+            <View
+                android:id="@+id/shutter"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/black" />
+
+        </com.google.android.exoplayer.AspectRatioFrameLayout>
+
+        <LinearLayout
+            android:id="@+id/controls_root"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/retry_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="retry"
+                android:visibility="gone"
+                style="@style/DemoButton" />
+
+            <Button
+                android:id="@+id/full_screen_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="toggle"
+                android:visibility="gone"
+                style="@style/DemoButton" />
+
+        </LinearLayout>
+
+    </FrameLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/headerview"/>
+        android:id="@+id/headerview" />
 
     <FrameLayout
         android:layout_width="match_parent"

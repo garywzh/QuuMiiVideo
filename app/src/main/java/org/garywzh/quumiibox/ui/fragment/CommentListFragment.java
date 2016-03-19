@@ -25,7 +25,7 @@ public class CommentListFragment extends Fragment implements LoaderCallbacks<Loa
     private static final String TAG = CommentListFragment.class.getSimpleName();
     private static final String ARG_ID = "id";
 
-    private int mId;
+    private String blogId;
     private RecyclerView commentList;
     private CommentAdapter.OnCommentActionListener mListener;
     private CommentAdapter mCommentAdapter;
@@ -34,10 +34,10 @@ public class CommentListFragment extends Fragment implements LoaderCallbacks<Loa
         // Required empty public constructor
     }
 
-    public static CommentListFragment newInstance(int id) {
+    public static CommentListFragment newInstance(String id) {
         CommentListFragment fragment = new CommentListFragment();
         Bundle args = new Bundle();
-        args.putInt(ARG_ID, id);
+        args.putString(ARG_ID, id);
         fragment.setArguments(args);
         return fragment;
     }
@@ -45,8 +45,9 @@ public class CommentListFragment extends Fragment implements LoaderCallbacks<Loa
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
         if (getArguments() != null) {
-            mId = getArguments().getInt(ARG_ID);
+            blogId = getArguments().getString(ARG_ID);
         }
         setHasOptionsMenu(true);
     }
@@ -78,7 +79,7 @@ public class CommentListFragment extends Fragment implements LoaderCallbacks<Loa
 
     @Override
     public Loader<LoaderResult<List<Comment>>> onCreateLoader(int id, Bundle args) {
-        return new CommentListLoader(getActivity(), mId);
+        return new CommentListLoader(getActivity(), blogId);
     }
 
     @Override

@@ -7,8 +7,9 @@
 
     <ImageView
         android:id="@+id/cover_img"
-        android:layout_width="129dp"
-        android:layout_height="90dp"
+        android:layout_width="176dp"
+        android:layout_height="100dp"
+        android:scaleType="centerCrop"
         tools:src="@drawable/coverpic_default"
         android:contentDescription="@string/desc_coverpic" />
 

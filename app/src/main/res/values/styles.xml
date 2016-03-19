@@ -9,6 +9,7 @@
     <style name="AppTheme" parent="AppBaseTheme">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="windowActionModeOverlay">true</item>
     </style>
 
     <style name="AppTheme.BlackStatusBar" parent="AppTheme" />
@@ -38,4 +39,12 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="DemoButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:padding">6dp</item>
+        <item name="android:background">#aa000000</item>
+        <item name="android:minWidth">40dp</item>
+    </style>
 </resources>

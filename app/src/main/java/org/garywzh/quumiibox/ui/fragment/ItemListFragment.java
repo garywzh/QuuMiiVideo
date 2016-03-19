@@ -18,7 +18,6 @@ import android.widget.Toast;
 
 import org.garywzh.quumiibox.R;
 import org.garywzh.quumiibox.model.Item;
-import org.garywzh.quumiibox.model.Tag;
 import org.garywzh.quumiibox.network.RequestHelper;
 import org.garywzh.quumiibox.ui.MainActivity;
 import org.garywzh.quumiibox.ui.adapter.ItemAdapter;
@@ -33,12 +32,9 @@ import java.util.List;
 public class ItemListFragment extends Fragment implements LoaderCallbacks<LoaderResult<List<Item>>>, SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = ItemListFragment.class.getSimpleName();
     private static final String ARG_TYPE = "type";
-    private static final String ARG_TAG = "tag";
-    public static final int TYPE_HOME = 0;
-    public static final int TYPE_VIDEO = 1;
-    public static final int TYPE_IMAGE = 2;
-    public static final int TYPE_TAG = 3;
-    public static final int TYPE_FAV = 4;
+    private static final String ARG_QUERY = "query";
+    public static final int TYPE_ALL = 0;
+    public static final int TYPE_SEARCH = 1;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ItemAdapter mAdapter;
@@ -50,14 +46,15 @@ public class ItemListFragment extends Fragment implements LoaderCallbacks<Loader
     private int mCount;
     private List<Item> mItems;
     private int mType;
-    private Tag mTag;
+    private String mQueryString;
+    private boolean neverCreateView;
 
-    public static ItemListFragment newInstance(int type, Tag tag) {
+    public static ItemListFragment newInstance(int type, String queryString) {
         ItemListFragment fragment = new ItemListFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_TYPE, type);
-        if (tag != null) {
-            args.putParcelable(ARG_TAG, tag);
+        if (queryString != null) {
+            args.putString(ARG_QUERY, queryString);
         }
         fragment.setArguments(args);
         return fragment;
@@ -73,12 +70,11 @@ public class ItemListFragment extends Fragment implements LoaderCallbacks<Loader
         final Bundle arguments = getArguments();
         if (arguments != null) {
             mType = arguments.getInt(ARG_TYPE);
-            mTag = arguments.getParcelable(ARG_TAG);
+            mQueryString = arguments.getString(ARG_QUERY);
         }
-
         mItems = new ArrayList<>();
         mCount = 0;
-
+        neverCreateView = true;
         setHasOptionsMenu(true);
     }
 
@@ -89,16 +85,18 @@ public class ItemListFragment extends Fragment implements LoaderCallbacks<Loader
         mSwipeRefreshLayout = (SwipeRefreshLayout) inflater.inflate(R.layout.fragment_item_list,
                 container, false);
         mSwipeRefreshLayout.setOnRefreshListener(this);
-
         initRecyclerView();
 
         onLoading = true;
-        mSwipeRefreshLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                mSwipeRefreshLayout.setRefreshing(true);
-            }
-        });
+        if (neverCreateView) {
+            neverCreateView = false;
+            mSwipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshLayout.setRefreshing(true);
+                }
+            });
+        }
 
         return mSwipeRefreshLayout;
     }
@@ -138,63 +136,52 @@ public class ItemListFragment extends Fragment implements LoaderCallbacks<Loader
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
+        getLoaderManager().initLoader(0, null, this);
         final MainActivity activity = ((MainActivity) getActivity());
-
         switch (mType) {
-            case TYPE_HOME:
+            case TYPE_ALL:
                 activity.setTitle(getString(R.string.drawer_home));
+                activity.setNavSelected(R.id.drawer_home);
                 break;
-            case TYPE_VIDEO:
-                activity.setTitle(getString(R.string.drawer_video));
-                break;
-            case TYPE_IMAGE:
-                activity.setTitle(getString(R.string.drawer_image));
-                break;
-            case TYPE_FAV:
-                activity.setTitle(getString(R.string.drawer_fav));
-                break;
-            case TYPE_TAG:
-                activity.setTitle(mTag.getName());
+            case TYPE_SEARCH:
+                activity.setTitle(mQueryString);
                 break;
         }
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-
-        getLoaderManager().initLoader(0, null, this);
+    public void onResume() {
+        super.onResume();
     }
 
     @Override
     public Loader<LoaderResult<List<Item>>> onCreateLoader(int id, Bundle args) {
-        return new ItemListLoader(getActivity(), mType, (mTag == null) ? 0 : mTag.getId());
+        return new ItemListLoader(getActivity(), mType, mQueryString);
     }
 
     @Override
     public void onLoadFinished(Loader<LoaderResult<List<Item>>> loader, LoaderResult<List<Item>> result) {
         if (result.hasException()) {
             Toast.makeText(getActivity(), "视频列表加载失败 - 网络错误", Toast.LENGTH_LONG).show();
+            mSwipeRefreshLayout.setRefreshing(false);
+            onLoading = false;
             return;
         }
-
         if (mCount == 0) {
             mItems.clear();
             linearLayoutManager.scrollToPositionWithOffset(0, 0);
         }
-
         if (result.mResult.size() == 0) {
             noMore = true;
         } else {
-            if (result.mResult.size() < RequestHelper.ONCE_LOAD_PAGE_COUNT * 20) {
+            if (result.mResult.size() < RequestHelper.ONCE_LOAD_ITEM_COUNT) {
                 noMore = true;
+                LogUtils.d(TAG, "No more items");
             }
             mCount++;
             ListUtils.mergeListWithoutDuplicates(mItems, result.mResult);
             mAdapter.setDataSource(mItems);
         }
-
         mSwipeRefreshLayout.setRefreshing(false);
         onLoading = false;
         LogUtils.d(TAG, "onLoadFinished called");
@@ -247,19 +234,16 @@ public class ItemListFragment extends Fragment implements LoaderCallbacks<Loader
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_topic_list, menu);
-
         super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-
         if (id == R.id.action_refresh) {
             onRefresh();
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 }

@@ -11,15 +11,15 @@ import java.util.List;
  * Created by garywzh on 2015/10/10.
  */
 public class CommentListLoader extends AsyncTaskLoader<List<Comment>> {
-    private int mId;
+    private String blogId;
 
-    public CommentListLoader(Context context, int id) {
+    public CommentListLoader(Context context, String id) {
         super(context);
-        mId = id;
+        blogId = id;
     }
 
     @Override
     public List<Comment> loadInBackgroundWithException() throws Exception {
-        return RequestHelper.getComments(mId);
+        return RequestHelper.getComments(blogId);
     }
 }

@@ -3,76 +3,69 @@ package org.garywzh.quumiibox.network;
 import android.util.Log;
 import android.view.MenuItem;
 
-import com.google.common.collect.Lists;
-import com.google.common.net.HttpHeaders;
-import com.squareup.okhttp.FormEncodingBuilder;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.garywzh.quumiibox.AppContext;
 import org.garywzh.quumiibox.BuildConfig;
 import org.garywzh.quumiibox.R;
+import org.garywzh.quumiibox.common.UserState;
 import org.garywzh.quumiibox.common.exception.ConnectionException;
 import org.garywzh.quumiibox.common.exception.RemoteException;
 import org.garywzh.quumiibox.common.exception.RequestException;
-import org.garywzh.quumiibox.eventbus.UserOptionEvent;
+import org.garywzh.quumiibox.eventbus.UserOperationEvent;
 import org.garywzh.quumiibox.model.Comment;
 import org.garywzh.quumiibox.model.Item;
+import org.garywzh.quumiibox.model.ItemList;
 import org.garywzh.quumiibox.model.LoginResult;
-import org.garywzh.quumiibox.model.Member;
-import org.garywzh.quumiibox.network.interceptor.UserAgentInterceptor;
-import org.garywzh.quumiibox.parser.CommentListParser;
-import org.garywzh.quumiibox.parser.ItemListParser;
-import org.garywzh.quumiibox.parser.MemberParser;
-import org.garywzh.quumiibox.parser.MyselfParser;
-import org.garywzh.quumiibox.parser.Parser;
-import org.garywzh.quumiibox.parser.VideoUrlParser;
+import org.garywzh.quumiibox.model.OperatInfo;
+import org.garywzh.quumiibox.model.UserOperation;
+import org.garywzh.quumiibox.model.VideoInfo;
 import org.garywzh.quumiibox.ui.fragment.ItemListFragment;
 import org.garywzh.quumiibox.util.LogUtils;
-import org.jsoup.nodes.Document;
+import org.garywzh.quumiibox.util.UTF8EncoderUtil;
 
 import java.io.IOException;
-import java.net.CookieManager;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class RequestHelper {
-    public static final String BASE_URL = "http://www.huojidao.com";
+import okhttp3.FormBody;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
+public class RequestHelper {
     private static final String TAG = RequestHelper.class.getSimpleName();
 
-    private static final String HOME_PAGE_URL_PREFIX = BASE_URL + "/itemlist.php?type=all.0.0.0.hot.0.0.&page=";
-    private static final String IMAGE_LIST_URL_PREFIX = BASE_URL + "/itemlist.php?type=all.0.0.0.dateline.0.1.2&page=";
-    private static final String VIDEO_LIST_URL_PREFIX = BASE_URL + "/itemlist.php?type=all.0.0.0.dateline.0.1.3&page=";
-    private static final String ITEM_LIST_BY_TAG_URL_PREFIX = BASE_URL + "/itemlist-do-tag-id-104-page-4.html";
-
-    private static final String VIDEO_URL_PREFIX = "http://www.quumii.com/videolist/fake.php?blogid=";
-
-    private static final String URL_SIGN_IN = BASE_URL + "/do.php?ac=943c400772ea74e9ed9335e02dc786a3&&ref";
-
+    public static final String BASE_URL = "http://www.quumii.com";
+    private static final String LOGIN_URL = BASE_URL + "/app/api.php?method=registerlogin";
+    private static final String HOME_URL = BASE_URL + "/app/api.php?end=50&start=0&method=getlist&ftime=1";
+    private static final String SEARCH_URL_PREFIX = BASE_URL + "/api.php?end=50&start=0&method=getlist&search=";
+    private static final String COMMENT_LIST_URL_PREFIX = BASE_URL + "/app/api.php?method=getcomment&blogid=";
+    private static final String VIDEO_INFO_URL_PREFIX = BASE_URL + "/app/api.php?method=getv&vid=";
+    private static final String USER_OPRATION_URL = BASE_URL + "/app/api.php?method=click";
     private static final int SERVER_ERROR_CODE = 500;
-
-    public static final int ONCE_LOAD_PAGE_COUNT = 2;
+    public static final int ONCE_LOAD_ITEM_COUNT = 30;
 
     private static final OkHttpClient CLIENT;
-
-    private static MyCookieStore mCookies;
-
-    private static final UserAgentInterceptor USER_AGENT_INTERCEPTOR;
+    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    private static final Gson GSON;
 
     static {
-        CLIENT = new OkHttpClient();
-        CLIENT.setConnectTimeout(10, TimeUnit.SECONDS);
-        CLIENT.setWriteTimeout(10, TimeUnit.SECONDS);
-        CLIENT.setReadTimeout(30, TimeUnit.SECONDS);
-//        CLIENT.networkInterceptors().add(new UserAgentInterceptor());
-        CLIENT.setFollowRedirects(false);
+        CLIENT = new OkHttpClient.Builder()
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .writeTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .followRedirects(true)
+                .build();
 
-        mCookies = new MyCookieStore(AppContext.getInstance());
-        CLIENT.setCookieHandler(new CookieManager(mCookies, null));
-        USER_AGENT_INTERCEPTOR = new UserAgentInterceptor();
+        GSON = new Gson();
+    }
+
+    private static Gson getGson() {
+        return GSON;
     }
 
     public static OkHttpClient getClient() {
@@ -80,232 +73,144 @@ public class RequestHelper {
     }
 
     public static LoginResult login(String username, String password) throws ConnectionException, RemoteException {
-        clearCookies();
-
         LogUtils.v(TAG, "login user: " + username);
 
-        final Request preLoginRequest = new Request.Builder()
-                .url("http://www.huojidao.com/do.php?ac=943c400772ea74e9ed9335e02dc786a3")
-                .build();
-        Response response = sendRequest(preLoginRequest);
-
-        final RequestBody requestBody = new FormEncodingBuilder()
-                .add("utf8", "✓")
-                .add("ok_url", "")
+        final RequestBody requestBody = new FormBody.Builder()
                 .add("username", username)
-                .add("captcha", "")
-                .add("captcha_key", "f7ea5e4ca14fb36aa0d7318b7b040b83d59ba804")
-                .add("verify_code", "")
                 .add("password", password)
-                .add("cookietime", "315360000")
-                .add("refer", "http://www.huojidao.com/index.php")
-                .add("loginsubmit", "登录")
-                .add("formhash", "a80b3d4a")
                 .build();
-        Request request = new Request.Builder().url(URL_SIGN_IN)
-                .header(HttpHeaders.CACHE_CONTROL, "max-age=0")
-                .header(HttpHeaders.CONTENT_LENGTH, "272")
-                .header(HttpHeaders.COOKIE, "uchome_version=0")
-                .header(HttpHeaders.ORIGIN, "http://www.huojidao.com")
-                .header(HttpHeaders.REFERER, "http://www.huojidao.com/do.php?ac=943c400772ea74e9ed9335e02dc786a3")
-                .post(requestBody).build();
-        response = sendRequest(request);
+        Request request = new Request.Builder()
+                .url(LOGIN_URL)
+                .post(requestBody)
+                .build();
+        Response response = sendRequest(request);
 
-        // 登陆成功的话，返回的response的header里的Set-Cookie字段有4个
-        if (response.headers(HttpHeaders.SET_COOKIE).size() < 4) {
-            LogUtils.d(TAG, "cookie count" + response.headers(HttpHeaders.SET_COOKIE).size());
+        final LoginResult loginResult;
+        try {
+            final String json = response.body().string();
+            loginResult = getGson().fromJson(json, new TypeToken<LoginResult>() {
+            }.getType());
+        } catch (IOException e) {
+            throw new ConnectionException(e);
+        }
+        if (loginResult.operatinfo.status == OperatInfo.STATUS_LOGIN_SUCCESS) {
+            LogUtils.d(TAG, "login succeed");
+            return loginResult;
+        } else {
             LogUtils.d(TAG, "login failed");
             return null;
         }
-
-        LogUtils.d(TAG, "login succeed");
-
-        final Request homeRequest = new Request.Builder()
-                .url(BASE_URL)
-                .build();
-        response = sendRequest(homeRequest);
-
-        final String myselfUrl;
-        final int myCredit;
-        final int myselfId;
-        try {
-            final String html = response.body().string();
-            final Document document = Parser.toDoc(html);
-            myselfId = MyselfParser.parseId(document);
-
-            myCredit = MyselfParser.parseCredit(document);
-            myselfUrl = Member.buildUrlFromId(myselfId);
-        } catch (IOException e) {
-            throw new ConnectionException(e);
-        }
-
-        final Request MyselfInfoRequest = new Request.Builder()
-                .url(myselfUrl)
-                .build();
-        response = sendRequest(MyselfInfoRequest);
-
-        try {
-            final String html = response.body().string();
-            final Document document = Parser.toDoc(html);
-            final Member.Builder builder = MemberParser.parseDocForMemberNameAndAvatar(document);
-
-            builder.setId(myselfId);
-            return new LoginResult(builder.createMember(), myCredit);
-        } catch (IOException e) {
-            throw new ConnectionException(e);
-        }
     }
 
-    //    一次获取多页视频，减少网络获取频率，避免loading标志出现频率过高
-    public static List<Item> getMutiPageItemsByCount(int type, int tagId, int count) throws ConnectionException, RemoteException {
-        final List<Item> result = Lists.newArrayListWithCapacity(ONCE_LOAD_PAGE_COUNT * 20);
-        for (int i = 1; i <= ONCE_LOAD_PAGE_COUNT; i++) {
-            result.addAll(getItemsByTypeByPage(type, tagId, (count - 1) * ONCE_LOAD_PAGE_COUNT + i));
-        }
-        return result;
-    }
-
-    public static List<Item> getItemsByTypeByPage(int type, int tagId, int page) throws ConnectionException, RemoteException {
+    public static List<Item> getItemsByTypeByPage(int type, String queryString, int page) throws ConnectionException, RemoteException {
+        final int start = (page - 1) * ONCE_LOAD_ITEM_COUNT;
+        final int end = start + ONCE_LOAD_ITEM_COUNT;
         String itemListUrl;
-
         switch (type) {
-            case ItemListFragment.TYPE_HOME:
-                itemListUrl = HOME_PAGE_URL_PREFIX + page;
+            case ItemListFragment.TYPE_ALL:
+                itemListUrl = BASE_URL + "/app/api.php?end=" + end + "&start=" + start + "&method=getlist&ftime=1";
                 break;
-            case ItemListFragment.TYPE_VIDEO:
-                itemListUrl = VIDEO_LIST_URL_PREFIX + page;
-                break;
-            case ItemListFragment.TYPE_IMAGE:
-                itemListUrl = IMAGE_LIST_URL_PREFIX + page;
-                break;
-            case ItemListFragment.TYPE_TAG:
-                itemListUrl = BASE_URL + "/itemlist-do-tag-id-" + tagId + "-page-" + page + ".html";
-                break;
-            case ItemListFragment.TYPE_FAV:
-                itemListUrl = BASE_URL + "/itemlist.php?type=trace.0.0.0.hot.0.1.0&page=" + page;
+            case ItemListFragment.TYPE_SEARCH:
+                itemListUrl = BASE_URL + "/app/api.php?end=" + end + "&start=" + start + "&method=getlist&search=" + UTF8EncoderUtil.encode(queryString);
                 break;
             default:
                 throw new RuntimeException("error type");
         }
-
         LogUtils.d(TAG, "start loading items");
 
         final Request request = new Request.Builder()
                 .url(itemListUrl)
                 .build();
-
         final Response response = sendRequest(request);
-
-        final Document doc;
-        final List<Item> items;
+        final ItemList itemList;
         try {
-            doc = Parser.toDoc(response.body().string());
-            items = ItemListParser.parseDocForItemList(doc, tagId > 0, type == ItemListFragment.TYPE_FAV);
+            final String json = response.body().string();
+            itemList = getGson().fromJson(json, new TypeToken<ItemList>() {
+            }.getType());
         } catch (IOException e) {
             throw new ConnectionException(e);
         }
-
-        if (BuildConfig.DEBUG) {
-            Log.v(TAG, "page " + page + " received items, count: " + items.size());
+        if (BuildConfig.DEBUG && itemList.content != null) {
+            Log.v(TAG, "page " + page + " received items, count: " + itemList.content.size());
         }
-
-        return items;
+        return itemList.content;
     }
 
-    public static String getWebViewLinkById(String id) throws ConnectionException, RemoteException {
+    public static VideoInfo getVideoInfo(String id) throws ConnectionException, RemoteException {
         final Request request = new Request.Builder()
-                .url(VIDEO_URL_PREFIX + id)
+                .url(VIDEO_INFO_URL_PREFIX + id)
                 .build();
-
-//        通过手机 User-Agent 才能获得 html5 视频链接
-        CLIENT.networkInterceptors().add(USER_AGENT_INTERCEPTOR);
         final Response response = sendRequest(request);
-        CLIENT.networkInterceptors().remove(USER_AGENT_INTERCEPTOR);
-
-        final String link;
+        final VideoInfo videoInfo;
         try {
-            final Document doc = Parser.toDoc(response.body().string());
+            final String json = response.body().string();
 
-            link = VideoUrlParser.parseDocForVideoUrl(doc);
+            videoInfo = getGson().fromJson(json, new TypeToken<VideoInfo>() {
+            }.getType());
         } catch (IOException e) {
             throw new ConnectionException(e);
         }
-        return link;
+        return videoInfo;
     }
 
-    public static List<Comment> getComments(int id) throws ConnectionException, RemoteException {
-
-        final String itemPageUrl = Item.buildUrlFromId(id);
+    public static List<Comment> getComments(String id) throws ConnectionException, RemoteException {
+        final String commentListUrl = COMMENT_LIST_URL_PREFIX + id;
 
         LogUtils.d(TAG, "start loading comments");
         final Request request = new Request.Builder()
-                .url(itemPageUrl)
+                .url(commentListUrl)
                 .build();
-
         Response response = sendRequest(request);
         LogUtils.d(TAG, "comments got");
 
-        final Document doc;
         final List<Comment> comments;
         try {
-            doc = Parser.toDoc(response.body().string());
-            LogUtils.d(TAG, "toDoc done");
-            comments = CommentListParser.parseDocForCommentList(doc);
+            final String json = response.body().string();
+            comments = getGson().fromJson(json, new TypeToken<List<Comment>>() {
+            }.getType());
         } catch (IOException e) {
             throw new ConnectionException(e);
         }
-
         if (BuildConfig.DEBUG) {
-            Log.v(TAG, "received comments, count: " + comments.size());
+            if (comments != null) {
+                Log.v(TAG, "received comments, count: " + comments.size());
+            }
         }
-
         return comments;
     }
 
     public static void userOperation(Item item, MenuItem menuItem) throws ConnectionException, RemoteException {
-        String operationUrl;
-        boolean isFav = false;
+        UserOperation userOperation;
+        final String uid = UserState.getInstance().getId();
+        final String blogid = item.blogid;
+
         switch (menuItem.getItemId()) {
             case R.id.action_up:
-                operationUrl = item.getUpUrl();
+                userOperation = new UserOperation(uid, blogid, UserOperation.TYPE_LIKE);
                 break;
             case R.id.action_down:
-                operationUrl = item.getDowmUrl();
+                userOperation = new UserOperation(uid, blogid, UserOperation.TYPE_UNLIKE);
                 break;
             case R.id.action_fav:
-                operationUrl = item.getFavUrl();
-                isFav = true;
+                userOperation = new UserOperation(uid, blogid, UserOperation.TYPE_FAV);
                 break;
             default:
-                operationUrl = BASE_URL;
+                userOperation = new UserOperation();
         }
 
-        final Request request = new Request.Builder().url(operationUrl).build();
-        Response response = sendRequest(request);
-
-        if (isFav) {
-            try {
-                if (response.body().string().contains("收藏成功")) {
-                    AppContext.getEventBus().post(new UserOptionEvent(true));
-                } else {
-                    final Request unFavRequest = new Request.Builder().url(item.getUnFavUrl()).build();
-                    response = sendRequest(unFavRequest);
-                    if (response.body().string().contains("已删除")) {
-                        AppContext.getEventBus().post(new UserOptionEvent(false));
-                    }
-                }
-            } catch (IOException e) {
-                throw new ConnectionException(e);
-            }
+        String json = getGson().toJson(userOperation);
+        final RequestBody body = RequestBody.create(JSON, json);
+        final Request request = new Request.Builder().url(USER_OPRATION_URL).post(body).build();
+        final Response response = sendRequest(request);
+        try {
+            json = response.body().string();
+        } catch (IOException e) {
+            throw new ConnectionException(e);
         }
-    }
-
-    public static void clearCookies() {
-        mCookies.removeAll();
+        AppContext.getEventBus().post(new UserOperationEvent(userOperation.type, json));
     }
 
     static Response sendRequest(Request request) throws ConnectionException, RemoteException {
-
         final Response response;
         try {
             LogUtils.d(TAG, request.toString());
@@ -314,7 +219,6 @@ public class RequestHelper {
         } catch (IOException e) {
             throw new ConnectionException(e);
         }
-
         checkResponse(response);
         return response;
     }
@@ -323,16 +227,13 @@ public class RequestHelper {
         if (response.isSuccessful()) {
             return;
         }
-
         final int code = response.code();
-
         if (code == 302) {
             return;
         }
         if (code >= SERVER_ERROR_CODE) {
             throw new RemoteException(response);
         }
-
         if (code == 403 || code == 404) {
             try {
                 final String body = response.body().string();
