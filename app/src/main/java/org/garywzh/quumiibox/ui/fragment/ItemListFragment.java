@@ -1,6 +1,7 @@
 package org.garywzh.quumiibox.ui.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -19,7 +20,10 @@ import android.widget.Toast;
 import org.garywzh.quumiibox.R;
 import org.garywzh.quumiibox.model.Item;
 import org.garywzh.quumiibox.network.RequestHelper;
+import org.garywzh.quumiibox.ui.ImageActivity;
 import org.garywzh.quumiibox.ui.MainActivity;
+import org.garywzh.quumiibox.ui.TopicActivity;
+import org.garywzh.quumiibox.ui.VideoActivity;
 import org.garywzh.quumiibox.ui.adapter.ItemAdapter;
 import org.garywzh.quumiibox.ui.loader.AsyncTaskLoader.LoaderResult;
 import org.garywzh.quumiibox.ui.loader.ItemListLoader;
@@ -29,7 +33,7 @@ import org.garywzh.quumiibox.util.LogUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ItemListFragment extends Fragment implements LoaderCallbacks<LoaderResult<List<Item>>>, SwipeRefreshLayout.OnRefreshListener {
+public class ItemListFragment extends Fragment implements LoaderCallbacks<LoaderResult<List<Item>>>, SwipeRefreshLayout.OnRefreshListener, ItemAdapter.OnItemActionListener {
     private static final String TAG = ItemListFragment.class.getSimpleName();
     private static final String ARG_TYPE = "type";
     private static final String ARG_QUERY = "query";
@@ -39,7 +43,7 @@ public class ItemListFragment extends Fragment implements LoaderCallbacks<Loader
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ItemAdapter mAdapter;
     private RecyclerView recyclerView;
-    private ItemAdapter.OnItemActionListener mListener;
+    private Context mContext;
     private LinearLayoutManager linearLayoutManager;
     private boolean onLoading;
     private boolean noMore = false;
@@ -97,7 +101,6 @@ public class ItemListFragment extends Fragment implements LoaderCallbacks<Loader
                 }
             });
         }
-
         return mSwipeRefreshLayout;
     }
 
@@ -107,7 +110,7 @@ public class ItemListFragment extends Fragment implements LoaderCallbacks<Loader
         linearLayoutManager = new LinearLayoutManager(mSwipeRefreshLayout.getContext());
         recyclerView.setLayoutManager(linearLayoutManager);
 
-        mAdapter = new ItemAdapter(mListener);
+        mAdapter = new ItemAdapter(this);
         recyclerView.setAdapter(mAdapter);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -217,18 +220,13 @@ public class ItemListFragment extends Fragment implements LoaderCallbacks<Loader
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        try {
-            mListener = (ItemAdapter.OnItemActionListener) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString()
-                    + " must implement OnItemActionListener");
-        }
+        mContext = context;
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+        mContext = null;
     }
 
     @Override
@@ -245,5 +243,52 @@ public class ItemListFragment extends Fragment implements LoaderCallbacks<Loader
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onItemOpen(View view, Item item) {
+        final Intent intent;
+        switch (item.type) {
+            case "video":
+                intent = new Intent(mContext, VideoActivity.class);
+                Bundle VideoBundle = new Bundle();
+                VideoBundle.putParcelable("item", item);
+                intent.putExtras(VideoBundle);
+                break;
+            case "pic":
+                intent = new Intent(mContext, ImageActivity.class);
+                Bundle PicBundle = new Bundle();
+                PicBundle.putParcelable("item", item);
+                intent.putExtras(PicBundle);
+                break;
+            case "longpic":
+                intent = new Intent(mContext, ImageActivity.class);
+                Bundle LongPicBundle = new Bundle();
+                LongPicBundle.putParcelable("item", item);
+                intent.putExtras(LongPicBundle);
+                break;
+            case "gif":
+                intent = new Intent(mContext, ImageActivity.class);
+                Bundle GifBundle = new Bundle();
+                GifBundle.putParcelable("item", item);
+                intent.putExtras(GifBundle);
+                break;
+            case "link":
+                intent = new Intent(mContext, TopicActivity.class);
+                Bundle TopicBundle = new Bundle();
+                TopicBundle.putParcelable("item", item);
+                intent.putExtras(TopicBundle);
+                break;
+            case "duanzi":
+                intent = new Intent(mContext, TopicActivity.class);
+                Bundle DuanziBundle = new Bundle();
+                DuanziBundle.putParcelable("item", item);
+                intent.putExtras(DuanziBundle);
+                break;
+            default:
+                throw new RuntimeException("unknown type");
+        }
+        startActivity(intent);
+        return false;
     }
 }

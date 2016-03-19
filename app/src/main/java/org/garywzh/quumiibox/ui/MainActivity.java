@@ -27,15 +27,13 @@ import org.garywzh.quumiibox.BuildConfig;
 import org.garywzh.quumiibox.R;
 import org.garywzh.quumiibox.common.UserState;
 import org.garywzh.quumiibox.eventbus.LoginEvent;
-import org.garywzh.quumiibox.model.Item;
 import org.garywzh.quumiibox.model.UserInfo;
 import org.garywzh.quumiibox.ui.adapter.CategoryAdapter;
-import org.garywzh.quumiibox.ui.adapter.ItemAdapter;
 import org.garywzh.quumiibox.ui.fragment.CategoryFragment;
 import org.garywzh.quumiibox.ui.fragment.ItemListFragment;
 import org.garywzh.quumiibox.ui.widget.SearchBoxLayout;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ItemAdapter.OnItemActionListener, CategoryAdapter.OnCateItemClickListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, CategoryAdapter.OnCateItemClickListener {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private DrawerLayout mDrawerLayout;
@@ -224,7 +222,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mSearchBox.hide();
             return;
         }
-
         super.onBackPressed();
     }
 
@@ -246,57 +243,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         updateNavView();
     }
 
-
     @Override
     public void onCateItemClick(String item) {
         switchFragment(ItemListFragment.newInstance(ItemListFragment.TYPE_SEARCH, item));
-    }
-
-    @Override
-    public boolean onItemOpen(View view, Item item) {
-        final Intent intent;
-        switch (item.type) {
-            case "video":
-                intent = new Intent(this, VideoActivity.class);
-                Bundle VideoBundle = new Bundle();
-                VideoBundle.putParcelable("item", item);
-                intent.putExtras(VideoBundle);
-                break;
-            case "pic":
-                intent = new Intent(this, ImageActivity.class);
-                Bundle PicBundle = new Bundle();
-                PicBundle.putParcelable("item", item);
-                intent.putExtras(PicBundle);
-                break;
-            case "longpic":
-                intent = new Intent(this, ImageActivity.class);
-                Bundle LongPicBundle = new Bundle();
-                LongPicBundle.putParcelable("item", item);
-                intent.putExtras(LongPicBundle);
-                break;
-            case "gif":
-                intent = new Intent(this, ImageActivity.class);
-                Bundle GifBundle = new Bundle();
-                GifBundle.putParcelable("item", item);
-                intent.putExtras(GifBundle);
-                break;
-            case "link":
-                intent = new Intent(this, TopicActivity.class);
-                Bundle TopicBundle = new Bundle();
-                TopicBundle.putParcelable("item", item);
-                intent.putExtras(TopicBundle);
-                break;
-            case "duanzi":
-                intent = new Intent(this, TopicActivity.class);
-                Bundle DuanziBundle = new Bundle();
-                DuanziBundle.putParcelable("item", item);
-                intent.putExtras(DuanziBundle);
-                break;
-            default:
-                throw new RuntimeException("unknown type");
-        }
-
-        startActivity(intent);
-        return false;
     }
 }
