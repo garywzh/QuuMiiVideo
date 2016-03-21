@@ -20,19 +20,16 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         getFragmentManager().beginTransaction().replace(android.R.id.content, mFragment).commit();
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-
         if (id == android.R.id.home) {
             onBackPressed();
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -56,10 +53,9 @@ public class SettingsActivity extends AppCompatActivity {
 
     public static class PrefsFragment extends PreferenceFragment implements Preference.OnPreferenceClickListener {
 
-        private static final String PREF_KEY_CATEGORY_GENERAL = "general";
+        private static final String PREF_KEY_CATEGORY_USER = "user";
         private static final String PREF_KEY_LOGIN = "login";
         private static final String PREF_KEY_LOGOUT = "logout";
-
         private static final int REQ_LOGIN = 0;
 
         @Override
@@ -68,22 +64,21 @@ public class SettingsActivity extends AppCompatActivity {
 
             // Load the preferences from an XML resource
             addPreferencesFromResource(R.xml.pref_general);
-
             init();
-
         }
 
         private void init() {
-            final PreferenceCategory general = (PreferenceCategory) findPreference(PREF_KEY_CATEGORY_GENERAL);
+            final PreferenceCategory user = (PreferenceCategory) findPreference(PREF_KEY_CATEGORY_USER);
             final Preference loginPref = findPreference(PREF_KEY_LOGIN);
             final Preference logoutPref = findPreference(PREF_KEY_LOGOUT);
 
             if (UserState.getInstance().isLoggedIn()) {
-                general.removePreference(loginPref);
+                user.removePreference(loginPref);
+                logoutPref.setOnPreferenceClickListener(this);
             } else {
+                user.removePreference(logoutPref);
                 loginPref.setOnPreferenceClickListener(this);
             }
-            logoutPref.setOnPreferenceClickListener(this);
         }
 
         @Override
@@ -95,7 +90,6 @@ public class SettingsActivity extends AppCompatActivity {
                     }
                     break;
             }
-
             super.onActivityResult(requestCode, resultCode, data);
         }
 
@@ -110,7 +104,6 @@ public class SettingsActivity extends AppCompatActivity {
                     getActivity().recreate();
                     return true;
             }
-
             return false;
         }
     }

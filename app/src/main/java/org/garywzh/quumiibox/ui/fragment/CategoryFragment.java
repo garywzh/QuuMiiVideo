@@ -22,6 +22,7 @@ import android.widget.FrameLayout;
 
 import com.bignerdranch.android.multiselector.ModalMultiSelectorCallback;
 import com.bignerdranch.android.multiselector.MultiSelector;
+import com.umeng.analytics.MobclickAgent;
 
 import org.garywzh.quumiibox.R;
 import org.garywzh.quumiibox.common.UserState;
@@ -62,6 +63,18 @@ public class CategoryFragment extends Fragment implements CategoryAdapter.OnStar
         recyclerView.setAdapter(mCategoryAdapter);
 
         return recyclerView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(getActivity());
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(getActivity());
     }
 
     @Override

@@ -28,6 +28,7 @@ import com.google.android.exoplayer.MediaCodecTrackRenderer;
 import com.google.android.exoplayer.MediaCodecUtil;
 import com.google.android.exoplayer.drm.UnsupportedDrmException;
 import com.google.android.exoplayer.util.Util;
+import com.umeng.analytics.MobclickAgent;
 
 import org.garywzh.quumiibox.R;
 import org.garywzh.quumiibox.common.exception.ConnectionException;
@@ -163,18 +164,18 @@ public class VideoActivity extends AppCompatActivity implements CommentAdapter.O
     @Override
     public void onResume() {
         super.onResume();
-        if (contentUri != null) {
-            if (player == null) {
-                if (!maybeRequestPermission()) {
-                    preparePlayer(true);
-                }
-            }
+        MobclickAgent.onResume(this);
+
+        if (contentUri != null & player == null & !maybeRequestPermission()) {
+            preparePlayer(true);
         }
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        MobclickAgent.onPause(this);
+
         releasePlayer();
         shutterView.setVisibility(View.VISIBLE);
     }

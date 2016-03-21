@@ -174,7 +174,7 @@ public class ItemListFragment extends Fragment implements LoaderCallbacks<Loader
             mItems.clear();
             linearLayoutManager.scrollToPositionWithOffset(0, 0);
         }
-        if (result.mResult.size() == 0) {
+        if (result.mResult == null) {
             noMore = true;
         } else {
             if (result.mResult.size() < RequestHelper.ONCE_LOAD_ITEM_COUNT) {

@@ -73,7 +73,6 @@ public class CommentListFragment extends Fragment implements LoaderCallbacks<Loa
     @Override
     public void onStart() {
         super.onStart();
-
         getLoaderManager().initLoader(0, null, this);
     }
 
