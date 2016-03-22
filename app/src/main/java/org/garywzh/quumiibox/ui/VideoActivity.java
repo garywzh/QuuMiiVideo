@@ -1,7 +1,5 @@
 package org.garywzh.quumiibox.ui;
 
-import android.Manifest;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -37,7 +35,6 @@ import org.garywzh.quumiibox.common.exception.RemoteException;
 import org.garywzh.quumiibox.model.Item;
 import org.garywzh.quumiibox.model.VideoInfo;
 import org.garywzh.quumiibox.network.RequestHelper;
-import org.garywzh.quumiibox.ui.adapter.CommentAdapter;
 import org.garywzh.quumiibox.ui.fragment.CommentListFragment;
 import org.garywzh.quumiibox.ui.fragment.ItemHeaderFragment;
 import org.garywzh.quumiibox.ui.player.DemoPlayer;
@@ -51,8 +48,7 @@ import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 
-public class VideoActivity extends AppCompatActivity implements CommentAdapter.OnCommentActionListener,
-        SurfaceHolder.Callback, View.OnClickListener, DemoPlayer.Listener {
+public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Callback, View.OnClickListener, DemoPlayer.Listener {
     private static final String TAG = VideoActivity.class.getSimpleName();
 
     private Item mItem;
@@ -166,7 +162,7 @@ public class VideoActivity extends AppCompatActivity implements CommentAdapter.O
         super.onResume();
         MobclickAgent.onResume(this);
 
-        if (contentUri != null & player == null & !maybeRequestPermission()) {
+        if (contentUri != null & player == null) {
             preparePlayer(true);
         }
     }
@@ -354,32 +350,6 @@ public class VideoActivity extends AppCompatActivity implements CommentAdapter.O
         }
     }
 
-    // Permission management methods
-
-    /**
-     * Checks whether it is necessary to ask for permission to read storage. If necessary, it also
-     * requests permission.
-     *
-     * @return true if a permission request is made. False if it is not necessary.
-     */
-    @TargetApi(23)
-    private boolean maybeRequestPermission() {
-        if (requiresPermission(Uri.parse(contentUri))) {
-            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    @TargetApi(23)
-    private boolean requiresPermission(Uri uri) {
-        return Util.SDK_INT >= 23
-                && Util.isLocalFileUri(uri)
-                && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED;
-    }
-
     private static final class KeyCompatibleMediaController extends MediaController {
 
         private MediaController.MediaPlayerControl playerControl;
@@ -413,11 +383,6 @@ public class VideoActivity extends AppCompatActivity implements CommentAdapter.O
             return super.dispatchKeyEvent(event);
         }
     }
-
-    @Override
-    public void onMemberClick() {
-    }
-
 
     private class PlayListFetcherTask extends AsyncTask<Void, Void, VideoInfo> {
         private final String vid;
@@ -453,9 +418,8 @@ public class VideoActivity extends AppCompatActivity implements CommentAdapter.O
                         contentType = Util.TYPE_OTHER;
                     }
                     if (player == null) {
-                        if (!maybeRequestPermission()) {
-                            preparePlayer(true);
-                        }
+                        preparePlayer(true);
+
                     } else {
                         player.setBackgrounded(false);
                     }

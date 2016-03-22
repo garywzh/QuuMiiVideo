@@ -8,10 +8,9 @@ import android.view.MenuItem;
 import com.umeng.analytics.MobclickAgent;
 
 import org.garywzh.quumiibox.R;
-import org.garywzh.quumiibox.ui.adapter.CommentAdapter;
 import org.garywzh.quumiibox.ui.fragment.CommentListFragment;
 
-public class CommentsActivity extends AppCompatActivity implements CommentAdapter.OnCommentActionListener {
+public class CommentsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,10 +34,6 @@ public class CommentsActivity extends AppCompatActivity implements CommentAdapte
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onMemberClick() {
     }
 
     @Override

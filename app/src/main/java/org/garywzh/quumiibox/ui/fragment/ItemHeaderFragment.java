@@ -20,7 +20,7 @@ import org.garywzh.quumiibox.common.UserState;
 import org.garywzh.quumiibox.common.exception.ConnectionException;
 import org.garywzh.quumiibox.common.exception.FatalException;
 import org.garywzh.quumiibox.common.exception.RemoteException;
-import org.garywzh.quumiibox.eventbus.UserOperationEvent;
+import org.garywzh.quumiibox.eventbus.UserOperationResponseEvent;
 import org.garywzh.quumiibox.model.Item;
 import org.garywzh.quumiibox.model.OperatInfo;
 import org.garywzh.quumiibox.model.UserOperation;
@@ -124,7 +124,7 @@ public class ItemHeaderFragment extends Fragment {
     }
 
     @Subscribe
-    public void onUserOptionEvent(UserOperationEvent e) {
+    public void onUserOptionResponseEvent(UserOperationResponseEvent e) {
         AppContext.getEventBus().unregister(this);
         if (e.message.contains(OperatInfo.MESSAGE_OK)) {
             switch (e.type) {

@@ -166,7 +166,7 @@ public class CategoryFragment extends Fragment implements CategoryAdapter.OnStar
         input.setLayoutParams(params);
         FrameLayout container = new FrameLayout(activity);
         container.addView(input);
-        OnDialogClickListener onDialogClickListener = new OnDialogClickListener(input);
+        OnAddItemDialogClickListener onDialogClickListener = new OnAddItemDialogClickListener(input);
         new AlertDialog.Builder(getActivity())
                 .setMessage("添加一个标签")
                 .setTitle("添加")
@@ -188,10 +188,10 @@ public class CategoryFragment extends Fragment implements CategoryAdapter.OnStar
                 .show();
     }
 
-    class OnDialogClickListener implements DialogInterface.OnClickListener {
+    class OnAddItemDialogClickListener implements DialogInterface.OnClickListener {
         private EditText mEditText;
 
-        public OnDialogClickListener(EditText editText) {
+        public OnAddItemDialogClickListener(EditText editText) {
             super();
             mEditText = editText;
         }

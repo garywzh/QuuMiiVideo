@@ -13,13 +13,15 @@ import org.garywzh.quumiibox.common.UserState;
 import org.garywzh.quumiibox.common.exception.ConnectionException;
 import org.garywzh.quumiibox.common.exception.RemoteException;
 import org.garywzh.quumiibox.common.exception.RequestException;
-import org.garywzh.quumiibox.eventbus.UserOperationEvent;
+import org.garywzh.quumiibox.eventbus.UserOperationResponseEvent;
+import org.garywzh.quumiibox.eventbus.UserReplyResponseEvent;
 import org.garywzh.quumiibox.model.Comment;
 import org.garywzh.quumiibox.model.Item;
 import org.garywzh.quumiibox.model.ItemList;
 import org.garywzh.quumiibox.model.LoginResult;
 import org.garywzh.quumiibox.model.OperatInfo;
 import org.garywzh.quumiibox.model.UserOperation;
+import org.garywzh.quumiibox.model.UserReply;
 import org.garywzh.quumiibox.model.VideoInfo;
 import org.garywzh.quumiibox.ui.fragment.ItemListFragment;
 import org.garywzh.quumiibox.util.LogUtils;
@@ -46,6 +48,7 @@ public class RequestHelper {
     private static final String COMMENT_LIST_URL_PREFIX = BASE_URL + "/app/api.php?method=getcomment&blogid=";
     private static final String VIDEO_INFO_URL_PREFIX = BASE_URL + "/app/api.php?method=getv&vid=";
     private static final String USER_OPRATION_URL = BASE_URL + "/app/api.php?method=click";
+    private static final String USER_REPLY_URL = BASE_URL + "/app/api.php?method=addcomment";
     private static final int SERVER_ERROR_CODE = 500;
     public static final int ONCE_LOAD_ITEM_COUNT = 30;
 
@@ -207,7 +210,22 @@ public class RequestHelper {
         } catch (IOException e) {
             throw new ConnectionException(e);
         }
-        AppContext.getEventBus().post(new UserOperationEvent(userOperation.type, json));
+        AppContext.getEventBus().post(new UserOperationResponseEvent(userOperation.type, json));
+    }
+
+    public static void sentReply(String blogid, String reply) throws ConnectionException, RemoteException {
+        final UserReply userReply = new UserReply(UserState.getInstance().getId(), blogid, "", reply);
+
+        String json = getGson().toJson(userReply);
+        final RequestBody body = RequestBody.create(JSON, json);
+        final Request request = new Request.Builder().url(USER_REPLY_URL).post(body).build();
+        final Response response = sendRequest(request);
+        try {
+            json = response.body().string();
+        } catch (IOException e) {
+            throw new ConnectionException(e);
+        }
+        AppContext.getEventBus().post(new UserReplyResponseEvent(json));
     }
 
     static Response sendRequest(Request request) throws ConnectionException, RemoteException {

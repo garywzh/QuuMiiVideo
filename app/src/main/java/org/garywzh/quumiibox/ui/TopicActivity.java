@@ -9,11 +9,10 @@ import com.umeng.analytics.MobclickAgent;
 
 import org.garywzh.quumiibox.R;
 import org.garywzh.quumiibox.model.Item;
-import org.garywzh.quumiibox.ui.adapter.CommentAdapter;
 import org.garywzh.quumiibox.ui.fragment.CommentListFragment;
 import org.garywzh.quumiibox.ui.fragment.ItemHeaderFragment;
 
-public class TopicActivity extends AppCompatActivity implements CommentAdapter.OnCommentActionListener {
+public class TopicActivity extends AppCompatActivity {
     private static final String TAG = TopicActivity.class.getSimpleName();
 
     private Item mItem;
@@ -45,10 +44,6 @@ public class TopicActivity extends AppCompatActivity implements CommentAdapter.O
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onMemberClick() {
     }
 
     @Override

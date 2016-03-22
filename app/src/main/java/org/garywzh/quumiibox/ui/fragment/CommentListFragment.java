@@ -1,33 +1,48 @@
 package org.garywzh.quumiibox.ui.fragment;
 
+import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import com.google.common.eventbus.Subscribe;
+
+import org.garywzh.quumiibox.AppContext;
 import org.garywzh.quumiibox.R;
+import org.garywzh.quumiibox.common.exception.ConnectionException;
+import org.garywzh.quumiibox.common.exception.FatalException;
+import org.garywzh.quumiibox.common.exception.RemoteException;
+import org.garywzh.quumiibox.eventbus.UserReplyResponseEvent;
 import org.garywzh.quumiibox.model.Comment;
+import org.garywzh.quumiibox.model.OperatInfo;
+import org.garywzh.quumiibox.network.RequestHelper;
 import org.garywzh.quumiibox.ui.adapter.CommentAdapter;
 import org.garywzh.quumiibox.ui.loader.AsyncTaskLoader.LoaderResult;
 import org.garywzh.quumiibox.ui.loader.CommentListLoader;
+import org.garywzh.quumiibox.util.ExecutorUtils;
 import org.garywzh.quumiibox.util.LogUtils;
 
 import java.util.List;
 
-public class CommentListFragment extends Fragment implements LoaderCallbacks<LoaderResult<List<Comment>>> {
+public class CommentListFragment extends Fragment implements LoaderCallbacks<LoaderResult<List<Comment>>>, CommentAdapter.OnReplyActionListener {
     private static final String TAG = CommentListFragment.class.getSimpleName();
     private static final String ARG_ID = "id";
 
     private String blogId;
     private RecyclerView commentList;
-    private CommentAdapter.OnCommentActionListener mListener;
     private CommentAdapter mCommentAdapter;
 
     public CommentListFragment() {
@@ -66,7 +81,7 @@ public class CommentListFragment extends Fragment implements LoaderCallbacks<Loa
     private void initCommentsView() {
         commentList.setLayoutManager(new LinearLayoutManager(commentList.getContext()));
 
-        mCommentAdapter = new CommentAdapter(mListener);
+        mCommentAdapter = new CommentAdapter(this);
         commentList.setAdapter(mCommentAdapter);
     }
 
@@ -104,17 +119,83 @@ public class CommentListFragment extends Fragment implements LoaderCallbacks<Loa
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        try {
-            mListener = (CommentAdapter.OnCommentActionListener) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString()
-                    + " must implement OnCommentActionListener");
-        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+    }
+
+    @Override
+    public void onReplyClick() {
+        showReplyDialog();
+    }
+
+    private void showReplyDialog() {
+        Activity activity = getActivity();
+        int margin_in_dp = 24;
+        final float scale = getResources().getDisplayMetrics().density;
+        int margin_in_px = (int) (margin_in_dp * scale + 0.5f);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.leftMargin = margin_in_px;
+        params.rightMargin = margin_in_px;
+        final EditText input = new EditText(activity);
+        input.setSingleLine(true);
+        input.setLayoutParams(params);
+        FrameLayout container = new FrameLayout(activity);
+        container.addView(input);
+        OnReplyDialogClickListener onDialogClickListener = new OnReplyDialogClickListener(input);
+        new AlertDialog.Builder(getActivity())
+                .setTitle("回复")
+                .setView(container)
+                .setPositiveButton("发送", onDialogClickListener)
+                .setNegativeButton("取消", onDialogClickListener)
+                .create()
+                .show();
+
+    }
+
+    class OnReplyDialogClickListener implements DialogInterface.OnClickListener {
+        private EditText mEditText;
+
+        public OnReplyDialogClickListener(EditText editText) {
+            super();
+            mEditText = editText;
+        }
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            switch (which) {
+                case Dialog.BUTTON_NEGATIVE:
+                    break;
+                case Dialog.BUTTON_POSITIVE:
+                    if (mEditText.getText().toString().length() == 0) {
+                        return;
+                    }
+                    AppContext.getEventBus().register(CommentListFragment.this);
+                    ExecutorUtils.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                RequestHelper.sentReply(blogId, mEditText.getText().toString());
+                            } catch (ConnectionException | RemoteException e) {
+                                throw new FatalException(e);
+                            }
+                        }
+                    });
+                    break;
+            }
+        }
+    }
+
+    @Subscribe
+    public void onUserReplyResponseEvent(UserReplyResponseEvent e) {
+        AppContext.getEventBus().unregister(this);
+        if (e.response.contains(OperatInfo.MESSAGE_SUCCESS)) {
+            Toast.makeText(getActivity(), getString(R.string.sueeccd), Toast.LENGTH_SHORT).show();
+            getLoader().onContentChanged();
+        } else {
+            Toast.makeText(getActivity(), e.response, Toast.LENGTH_SHORT).show();
+        }
     }
 }

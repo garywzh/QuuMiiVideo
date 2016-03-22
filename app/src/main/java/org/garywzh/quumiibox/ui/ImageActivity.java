@@ -14,10 +14,9 @@ import com.umeng.analytics.MobclickAgent;
 
 import org.garywzh.quumiibox.R;
 import org.garywzh.quumiibox.model.Item;
-import org.garywzh.quumiibox.ui.adapter.CommentAdapter;
 import org.garywzh.quumiibox.ui.fragment.ItemHeaderFragment;
 
-public class ImageActivity extends AppCompatActivity implements CommentAdapter.OnCommentActionListener {
+public class ImageActivity extends AppCompatActivity {
     private static final String TAG = ImageActivity.class.getSimpleName();
 
     private ImageView mImageView;
@@ -65,10 +64,6 @@ public class ImageActivity extends AppCompatActivity implements CommentAdapter.O
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onMemberClick() {
     }
 
     @Override

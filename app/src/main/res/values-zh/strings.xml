@@ -57,5 +57,6 @@
     <string name="action_delete">删除</string>
     <string name="action_reset">重置</string>
     <string name="action_search">搜索</string>
+    <string name="reply">回复</string>
 
 </resources>

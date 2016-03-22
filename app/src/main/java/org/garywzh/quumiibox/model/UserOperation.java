@@ -21,6 +21,4 @@ public class UserOperation {
         this.blogid = blogid;
         this.type = type;
     }
-
-
 }
