@@ -42,7 +42,13 @@ public class AppContext extends Application {
         Glide.get(this)
                 .register(GlideUrl.class, InputStream.class, new OkHttpUrlLoader.Factory(RequestHelper.getClient()));
         mEventBus = new AsyncEventBus(new HandlerExecutor());
-        ExecutorUtils.execute(new AsyncInitTask());
+        ExecutorUtils.execute(new Runnable() {
+            @Override
+            public void run() {
+                UserState.getInstance().init();
+                mIsInited = true;
+            }
+        });
     }
 
     public static EventBus getEventBus() {
@@ -51,13 +57,5 @@ public class AppContext extends Application {
 
     public static AppContext getInstance() {
         return mInstance;
-    }
-
-    private class AsyncInitTask implements Runnable {
-        @Override
-        public void run() {
-            UserState.getInstance().init();
-            mIsInited = true;
-        }
     }
 }

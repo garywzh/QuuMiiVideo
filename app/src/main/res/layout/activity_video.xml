@@ -36,32 +36,6 @@
 
         </com.google.android.exoplayer.AspectRatioFrameLayout>
 
-        <LinearLayout
-            android:id="@+id/controls_root"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="end"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-            <Button
-                android:id="@+id/retry_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="retry"
-                android:visibility="gone"
-                style="@style/DemoButton" />
-
-            <Button
-                android:id="@+id/full_screen_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="toggle"
-                android:visibility="gone"
-                style="@style/DemoButton" />
-
-        </LinearLayout>
-
     </FrameLayout>
 
     <FrameLayout

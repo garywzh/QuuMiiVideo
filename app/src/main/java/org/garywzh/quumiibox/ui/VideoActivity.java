@@ -1,22 +1,16 @@
 package org.garywzh.quumiibox.ui;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.MediaController;
 import android.widget.Toast;
 
 import com.google.android.exoplayer.AspectRatioFrameLayout;
@@ -37,6 +31,7 @@ import org.garywzh.quumiibox.model.VideoInfo;
 import org.garywzh.quumiibox.network.RequestHelper;
 import org.garywzh.quumiibox.ui.fragment.CommentListFragment;
 import org.garywzh.quumiibox.ui.fragment.ItemHeaderFragment;
+import org.garywzh.quumiibox.ui.player.CustomMediaController;
 import org.garywzh.quumiibox.ui.player.DemoPlayer;
 import org.garywzh.quumiibox.ui.player.DemoPlayer.RendererBuilder;
 import org.garywzh.quumiibox.ui.player.EventLogger;
@@ -48,7 +43,7 @@ import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 
-public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Callback, View.OnClickListener, DemoPlayer.Listener {
+public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Callback, DemoPlayer.Listener {
     private static final String TAG = VideoActivity.class.getSimpleName();
 
     private Item mItem;
@@ -61,13 +56,10 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
     }
 
     private EventLogger eventLogger;
-    private MediaController mediaController;
+    private CustomMediaController mediaController;
     private View shutterView;
     private AspectRatioFrameLayout videoFrame;
     private SurfaceView surfaceView;
-    private Button retryButton;
-    private Button fullScreenButton;
-    private View controls;
 
     private DemoPlayer player;
     private boolean playerNeedsPrepare;
@@ -87,30 +79,14 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
         mItem = getIntent().getExtras().getParcelable("item");
 
         View videoRoot = findViewById(R.id.video_root);
-        videoRoot.setOnTouchListener(new View.OnTouchListener() {
+        videoRoot.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    toggleControlsVisibility();
-                } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    view.performClick();
-                }
-                return true;
-            }
-        });
-        videoRoot.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE
-                        || keyCode == KeyEvent.KEYCODE_MENU) {
-                    return false;
-                }
-                return mediaController.dispatchKeyEvent(event);
+            public void onClick(View v) {
+                toggleControlsVisibility();
             }
         });
 
         shutterView = findViewById(R.id.shutter);
-        controls = findViewById(R.id.controls_root);
 
         videoFrame = (AspectRatioFrameLayout) findViewById(R.id.video_frame);
         final int width = getResources().getDisplayMetrics().widthPixels;
@@ -120,12 +96,8 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
 
         surfaceView = (SurfaceView) findViewById(R.id.surface_view);
         surfaceView.getHolder().addCallback(this);
-        mediaController = new KeyCompatibleMediaController(this);
-        mediaController.setAnchorView(videoRoot);
-        retryButton = (Button) findViewById(R.id.retry_button);
-        retryButton.setOnClickListener(this);
-        fullScreenButton = (Button) findViewById(R.id.full_screen_button);
-        fullScreenButton.setOnClickListener(this);
+        mediaController = new CustomMediaController(this);
+        mediaController.setAnchorView(videoFrame);
 
         CookieHandler currentHandler = CookieHandler.getDefault();
         if (currentHandler != defaultCookieManager) {
@@ -147,14 +119,27 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
         setIntent(intent);
     }
 
-    public void toggleOrientation() {
+    public void toggleFullScreen() {
         if (!isFullScreen) {
+            View decorView = getWindow().getDecorView();
+            decorView.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
             isFullScreen = true;
         } else {
+            View decorView = getWindow().getDecorView();
+            decorView.setSystemUiVisibility(0);
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             isFullScreen = false;
         }
+    }
+
+    public boolean isFullScreen() {
+        return isFullScreen;
     }
 
     @Override
@@ -182,19 +167,15 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
         releasePlayer();
     }
 
-    // OnClickListener methods
-
     @Override
-    public void onClick(View view) {
-        if (view == retryButton) {
-            preparePlayer(true);
-        } else if (view == fullScreenButton) {
-            toggleOrientation();
-        }
+    public void onBackPressed() {
+        if (isFullScreen) {
+            toggleFullScreen();
+        } else
+            super.onBackPressed();
     }
 
     // Internal methods
-
     private RendererBuilder getRendererBuilder() {
         String userAgent = Util.getUserAgent(this, "ExoPlayer");
         switch (contentType) {
@@ -224,7 +205,6 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
         if (playerNeedsPrepare) {
             player.prepare();
             playerNeedsPrepare = false;
-            updateButtonVisibilities();
         }
         player.setSurface(surfaceView.getHolder().getSurface());
         player.setPlayWhenReady(playWhenReady);
@@ -247,7 +227,6 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
         if (playbackState == ExoPlayer.STATE_ENDED) {
             showControls();
         }
-        updateButtonVisibilities();
     }
 
     @Override
@@ -280,7 +259,6 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
             Toast.makeText(getApplicationContext(), errorString, Toast.LENGTH_LONG).show();
         }
         playerNeedsPrepare = true;
-        updateButtonVisibilities();
         showControls();
     }
 
@@ -294,15 +272,9 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
 
     // User controls
 
-    private void updateButtonVisibilities() {
-        retryButton.setVisibility(playerNeedsPrepare ? View.VISIBLE : View.GONE);
-        fullScreenButton.setVisibility(playerNeedsPrepare ? View.GONE : View.VISIBLE);
-    }
-
     private void toggleControlsVisibility() {
         if (mediaController.isShowing()) {
             mediaController.hide();
-            controls.setVisibility(View.GONE);
         } else {
             showControls();
         }
@@ -310,9 +282,8 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
 
     private void showControls() {
         if (mediaController != null) {
-            mediaController.show(0);
+            mediaController.show();
         }
-        controls.setVisibility(View.VISIBLE);
     }
 
     // SurfaceHolder.Callback implementation
@@ -333,54 +304,6 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
     public void surfaceDestroyed(SurfaceHolder holder) {
         if (player != null) {
             player.blockingClearSurface();
-        }
-    }
-
-    // Permission request listener method
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                           int[] grantResults) {
-        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            preparePlayer(true);
-        } else {
-            Toast.makeText(getApplicationContext(), "storage_permission_denied",
-                    Toast.LENGTH_LONG).show();
-            finish();
-        }
-    }
-
-    private static final class KeyCompatibleMediaController extends MediaController {
-
-        private MediaController.MediaPlayerControl playerControl;
-
-        public KeyCompatibleMediaController(Context context) {
-            super(context);
-        }
-
-        @Override
-        public void setMediaPlayer(MediaController.MediaPlayerControl playerControl) {
-            super.setMediaPlayer(playerControl);
-            this.playerControl = playerControl;
-        }
-
-        @Override
-        public boolean dispatchKeyEvent(KeyEvent event) {
-            int keyCode = event.getKeyCode();
-            if (playerControl.canSeekForward() && keyCode == KeyEvent.KEYCODE_MEDIA_FAST_FORWARD) {
-                if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                    playerControl.seekTo(playerControl.getCurrentPosition() + 15000); // milliseconds
-                    show();
-                }
-                return true;
-            } else if (playerControl.canSeekBackward() && keyCode == KeyEvent.KEYCODE_MEDIA_REWIND) {
-                if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                    playerControl.seekTo(playerControl.getCurrentPosition() - 5000); // milliseconds
-                    show();
-                }
-                return true;
-            }
-            return super.dispatchKeyEvent(event);
         }
     }
 
