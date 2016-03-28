@@ -140,7 +140,8 @@ public class CommentListFragment extends Fragment implements LoaderCallbacks<Loa
         params.leftMargin = margin_in_px;
         params.rightMargin = margin_in_px;
         final EditText input = new EditText(activity);
-        input.setSingleLine(true);
+        input.setLines(1);
+        input.setMaxLines(5);
         input.setLayoutParams(params);
         FrameLayout container = new FrameLayout(activity);
         container.addView(input);

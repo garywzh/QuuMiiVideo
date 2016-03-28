@@ -7,10 +7,12 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.android.exoplayer.AspectRatioFrameLayout;
@@ -59,6 +61,7 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
     private CustomMediaController mediaController;
     private View shutterView;
     private AspectRatioFrameLayout videoFrame;
+    private FrameLayout videoRoot;
     private SurfaceView surfaceView;
 
     private DemoPlayer player;
@@ -67,6 +70,7 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
     private long playerPosition;
     private boolean isFullScreen;
 
+    private DisplayMetrics displayMetrics;
     private String contentUri;
     private int contentType;
 
@@ -78,7 +82,7 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
         isFullScreen = false;
         mItem = getIntent().getExtras().getParcelable("item");
 
-        View videoRoot = findViewById(R.id.video_root);
+        videoRoot = (FrameLayout) findViewById(R.id.video_root);
         videoRoot.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -87,17 +91,16 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
         });
 
         shutterView = findViewById(R.id.shutter);
-
         videoFrame = (AspectRatioFrameLayout) findViewById(R.id.video_frame);
-        final int width = getResources().getDisplayMetrics().widthPixels;
-        ViewGroup.LayoutParams lp = videoFrame.getLayoutParams();
-        lp.height = width;
-        videoFrame.setLayoutParams(lp);
+
+        displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        initVideoRootAspectRatio();
 
         surfaceView = (SurfaceView) findViewById(R.id.surface_view);
         surfaceView.getHolder().addCallback(this);
         mediaController = new CustomMediaController(this);
-        mediaController.setAnchorView(videoFrame);
+        mediaController.setAnchorView(videoRoot);
 
         CookieHandler currentHandler = CookieHandler.getDefault();
         if (currentHandler != defaultCookieManager) {
@@ -128,14 +131,25 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                             | View.SYSTEM_UI_FLAG_FULLSCREEN
                             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
             isFullScreen = true;
+
+            videoRoot.setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, displayMetrics.widthPixels));
         } else {
             View decorView = getWindow().getDecorView();
             decorView.setSystemUiVisibility(0);
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             isFullScreen = false;
+
+            initVideoRootAspectRatio();
         }
+    }
+
+    private void initVideoRootAspectRatio() {
+        final int height = (int) Math.ceil(displayMetrics.widthPixels / 1.777f);
+        videoRoot.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, height));
     }
 
     public boolean isFullScreen() {
@@ -175,7 +189,6 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
             super.onBackPressed();
     }
 
-    // Internal methods
     private RendererBuilder getRendererBuilder() {
         String userAgent = Util.getUserAgent(this, "ExoPlayer");
         switch (contentType) {
@@ -192,6 +205,7 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
         if (player == null) {
             player = new DemoPlayer(getRendererBuilder());
             player.addListener(this);
+            player.addListener(mediaController);
             player.seekTo(playerPosition);
             playerNeedsPrepare = true;
             mediaController.setMediaPlayer(player.getPlayerControl());
@@ -224,8 +238,8 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
 
     @Override
     public void onStateChanged(boolean playWhenReady, int playbackState) {
-        if (playbackState == ExoPlayer.STATE_ENDED) {
-            showControls();
+        if (playbackState == ExoPlayer.STATE_ENDED && isFullScreen()) {
+            toggleFullScreen();
         }
     }
 
@@ -266,8 +280,7 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
     public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees,
                                    float pixelWidthAspectRatio) {
         shutterView.setVisibility(View.GONE);
-        videoFrame.setAspectRatio(
-                height == 0 ? 1 : (width * pixelWidthAspectRatio) / height);
+        videoFrame.setAspectRatio(height == 0 ? 1 : (width * pixelWidthAspectRatio) / height);
     }
 
     // User controls

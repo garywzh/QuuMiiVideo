@@ -16,6 +16,8 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
+import com.google.android.exoplayer.ExoPlayer;
+
 import org.garywzh.quumiibox.R;
 import org.garywzh.quumiibox.ui.VideoActivity;
 
@@ -23,7 +25,7 @@ import java.lang.ref.WeakReference;
 import java.util.Formatter;
 import java.util.Locale;
 
-public class CustomMediaController extends FrameLayout {
+public class CustomMediaController extends FrameLayout implements DemoPlayer.Listener {
 
     private MediaController.MediaPlayerControl mPlayer;
     private Context mContext;
@@ -33,6 +35,7 @@ public class CustomMediaController extends FrameLayout {
     private TextView mEndTime, mCurrentTime;
     private boolean mShowing;
     private boolean mDragging;
+    private boolean isEnd = false;
     private static final int sDefaultTimeout = 3000;
     private static final int FADE_OUT = 1;
     private static final int SHOW_PROGRESS = 2;
@@ -66,6 +69,25 @@ public class CustomMediaController extends FrameLayout {
         addControllerView();
     }
 
+    @Override
+    public void onError(Exception e) {
+    }
+
+    @Override
+    public void onStateChanged(boolean playWhenReady, int playbackState) {
+        if (playbackState == ExoPlayer.STATE_ENDED) {
+            isEnd = true;
+            updatePausePlay();
+            show();
+        } else {
+            isEnd = false;
+        }
+    }
+
+    @Override
+    public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
+    }
+
     protected void addControllerView() {
         LayoutInflater inflate = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mRoot = inflate.inflate(R.layout.view_media_controller, this);
@@ -96,7 +118,7 @@ public class CustomMediaController extends FrameLayout {
     }
 
     public void show() {
-        show(mPlayer.isPlaying());
+        show(!isEnd && mPlayer.isPlaying());
     }
 
     public void show(boolean autoHide) {
@@ -203,10 +225,14 @@ public class CustomMediaController extends FrameLayout {
             return;
         }
 
-        if (mPlayer.isPlaying()) {
-            mPauseButton.setImageResource(R.drawable.ic_pause_white_24dp);
+        if (isEnd) {
+            mPauseButton.setImageResource(R.drawable.ic_refresh_white_24dp);
         } else {
-            mPauseButton.setImageResource(R.drawable.ic_play_arrow_white_24dp);
+            if (mPlayer.isPlaying()) {
+                mPauseButton.setImageResource(R.drawable.ic_pause_white_24dp);
+            } else {
+                mPauseButton.setImageResource(R.drawable.ic_play_arrow_white_24dp);
+            }
         }
     }
 
@@ -227,10 +253,15 @@ public class CustomMediaController extends FrameLayout {
             return;
         }
 
-        if (mPlayer.isPlaying()) {
-            mPlayer.pause();
+        if (isEnd) {
+            mPlayer.seekTo(0);
+            isEnd = false;
         } else {
-            mPlayer.start();
+            if (mPlayer.isPlaying()) {
+                mPlayer.pause();
+            } else {
+                mPlayer.start();
+            }
         }
         updatePausePlay();
     }

@@ -5,14 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    android:fitsSystemWindows="true"
     tools:context="org.garywzh.quumiibox.ui.VideoActivity">
 
     <FrameLayout
         android:id="@+id/video_root"
         android:focusable="true"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="300dp"
         android:background="@color/black"
         android:keepScreenOn="true">
 
