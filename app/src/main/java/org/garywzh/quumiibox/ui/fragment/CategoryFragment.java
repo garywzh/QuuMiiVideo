@@ -168,8 +168,7 @@ public class CategoryFragment extends Fragment implements CategoryAdapter.OnStar
         container.addView(input);
         OnAddItemDialogClickListener onDialogClickListener = new OnAddItemDialogClickListener(input);
         new AlertDialog.Builder(getActivity())
-                .setMessage("添加一个标签")
-                .setTitle("添加")
+                .setTitle("添加一个标签")
                 .setView(container)
                 .setPositiveButton("确认", onDialogClickListener)
                 .setNegativeButton("取消", onDialogClickListener)
