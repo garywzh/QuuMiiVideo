@@ -147,7 +147,7 @@ public class CommentListFragment extends Fragment implements LoaderCallbacks<Loa
         container.addView(input);
         OnReplyDialogClickListener onDialogClickListener = new OnReplyDialogClickListener(input);
         new AlertDialog.Builder(getActivity())
-                .setTitle("回复")
+                .setTitle("评论")
                 .setView(container)
                 .setPositiveButton("发送", onDialogClickListener)
                 .setNegativeButton("取消", onDialogClickListener)

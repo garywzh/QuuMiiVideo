@@ -27,6 +27,11 @@
 -dontwarn com.google.j2objc.annotations.Weak
 -dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
 
+# https://github.com/krschultz/android-proguard-snippets/issues/89
+-keepclassmembers class ** {
+    @com.google.common.eventbus.Subscribe public *;
+}
+
 # Okio
 -keep class sun.misc.Unsafe { *; }
 -dontwarn java.nio.file.*
