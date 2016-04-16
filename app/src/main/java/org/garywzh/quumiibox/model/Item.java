@@ -30,6 +30,43 @@ public class Item implements Parcelable {
     public String dateline;
     public String type;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Item item = (Item) o;
+
+        if (!blogid.equals(item.blogid)) return false;
+        if (!uid.equals(item.uid)) return false;
+        if (!vid.equals(item.vid)) return false;
+        if (link != null ? !link.equals(item.link) : item.link != null) return false;
+        if (img != null ? !img.equals(item.img) : item.img != null) return false;
+        if (subject != null ? !subject.equals(item.subject) : item.subject != null) return false;
+        if (description != null ? !description.equals(item.description) : item.description != null)
+            return false;
+        if (source != null ? !source.equals(item.source) : item.source != null) return false;
+        if (dateline != null ? !dateline.equals(item.dateline) : item.dateline != null)
+            return false;
+        return type.equals(item.type);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = blogid.hashCode();
+        result = 31 * result + uid.hashCode();
+        result = 31 * result + vid.hashCode();
+        result = 31 * result + (link != null ? link.hashCode() : 0);
+        result = 31 * result + (img != null ? img.hashCode() : 0);
+        result = 31 * result + (subject != null ? subject.hashCode() : 0);
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (source != null ? source.hashCode() : 0);
+        result = 31 * result + (dateline != null ? dateline.hashCode() : 0);
+        result = 31 * result + type.hashCode();
+        return result;
+    }
+
     public static String buildUrlFromBlogid(String blogid) {
         return "http://www.huoji.tv/itemlist.php?id=" + blogid;
     }

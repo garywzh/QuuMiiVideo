@@ -8,12 +8,15 @@ import java.util.List;
 public class ListUtils {
 
     public static <T> void mergeListWithoutDuplicates(List<T> toList, List<T> fromList) {
-        final T firtItemOfFromList = fromList.get(0);
-        for (int i = toList.size() - 1; i >= 0; i--) {
-            if (toList.get(i).equals(firtItemOfFromList)) {
-                for (int j = toList.size() - 1; j >= i; j--)
-                    toList.remove(j);
-                break;
+        if (toList.size() != 0) {
+            final T lastItemOfToList = toList.get(toList.size() - 1);
+            for (int i = 0; i < fromList.size(); i++) {
+                if (fromList.get(i).equals(lastItemOfToList)) {
+                    final int lastIndex = toList.size() - 1;
+                    for (int j = 0; j <= i; j++)
+                        toList.remove(lastIndex - j);
+                    break;
+                }
             }
         }
         toList.addAll(fromList);
