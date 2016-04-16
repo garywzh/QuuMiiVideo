@@ -8,8 +8,8 @@ android {
         applicationId 'org.garywzh.quumiibox'
         minSdkVersion 17
         targetSdkVersion 23
-        versionCode 9
-        versionName '1.0.9'
+        versionCode 10
+        versionName '1.1.0'
         manifestPlaceholders = [UMENG_CHANNEL_VALUE: "umeng"]
     }
 
@@ -40,6 +40,9 @@ android {
     productFlavors {
         play {
             manifestPlaceholders = [UMENG_CHANNEL_VALUE: "play"]
+        }
+        firim {
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "firim"]
         }
     }
 }

@@ -343,19 +343,14 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
         @Override
         protected void onPostExecute(final VideoInfo videoInfo) {
             if (mException == null) {
-                contentUri = videoInfo.url;
-                if (contentUri == null) {
+                if (videoInfo == null || videoInfo.url == null) {
                     Toast.makeText(VideoActivity.this, "cannot get video link", Toast.LENGTH_LONG).show();
                     return;
                 } else {
-                    if (contentUri.contains("youku")) {
-                        contentType = Util.TYPE_HLS;
-                    } else {
-                        contentType = Util.TYPE_OTHER;
-                    }
+                    contentUri = videoInfo.url;
+                    contentType = Util.TYPE_OTHER;
                     if (player == null) {
                         preparePlayer(true);
-
                     } else {
                         player.setBackgrounded(false);
                     }

@@ -118,7 +118,9 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
     }
 
     public void show() {
-        show(!isEnd && mPlayer.isPlaying());
+        if (mPlayer != null) {
+            show(!isEnd && mPlayer.isPlaying());
+        }
     }
 
     public void show(boolean autoHide) {
