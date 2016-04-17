@@ -4,7 +4,7 @@
 
 下载应用请戳
 
-[![Get it on Google Play](google-play-badge.png)](https://play.google.com/store/apps/details?id=org.garywzh.quumiibox)
+[![Get it on Google Play](http://www.android.com/images/brand/get_it_on_play_logo_small.png)](https://play.google.com/store/apps/details?id=org.garywzh.quumiibox)
 
 or
 
