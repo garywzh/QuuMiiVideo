@@ -2,7 +2,13 @@
 
 趣觅盒子是[火鸡岛](http://www.huoji.tv)的一个第三方客户端，数据来源于火鸡岛。
 
-下载应用最新版本请戳 http://fir.im/16ml
+下载应用请戳
+
+[![Get it on Google Play](google-play-badge.png)](https://play.google.com/store/apps/details?id=org.garywzh.quumiibox)
+
+or
+
+ http://fir.im/16ml
 
 ##FEATURE
 
