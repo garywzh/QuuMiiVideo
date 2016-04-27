@@ -19,13 +19,13 @@
         android:layout_alignParentBottom="true"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:background="@drawable/seekbar_background"
-        android:padding="8dp">
+        android:background="@drawable/seekbar_background">
 
         <TextView
             android:id="@+id/time_current"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingLeft="8dp"
             tools:text="3:25"
             android:textColor="@color/white" />
 
@@ -47,8 +47,7 @@
             android:id="@+id/fullscreen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="8dp"
-            android:paddingRight="2dp"
+            android:padding="8dp"
             android:src="@drawable/ic_fullscreen_white_24dp"
             android:background="@android:color/transparent" />
     </LinearLayout>
