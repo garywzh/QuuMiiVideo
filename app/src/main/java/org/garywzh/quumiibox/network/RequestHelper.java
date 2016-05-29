@@ -15,6 +15,7 @@ import org.garywzh.quumiibox.common.exception.RemoteException;
 import org.garywzh.quumiibox.common.exception.RequestException;
 import org.garywzh.quumiibox.eventbus.UserOperationResponseEvent;
 import org.garywzh.quumiibox.eventbus.UserReplyResponseEvent;
+import org.garywzh.quumiibox.eventbus.VideoInfoResponseEvent;
 import org.garywzh.quumiibox.model.Comment;
 import org.garywzh.quumiibox.model.Item;
 import org.garywzh.quumiibox.model.ItemList;
@@ -31,6 +32,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -139,21 +142,28 @@ public class RequestHelper {
         return itemList.content;
     }
 
-    public static VideoInfo getVideoInfo(String id) throws ConnectionException, RemoteException {
+    public static void fectchVideoInfo(String id) {
         final Request request = new Request.Builder()
                 .url(VIDEO_INFO_URL_PREFIX + id)
                 .build();
-        final Response response = sendRequest(request);
-        final VideoInfo videoInfo;
-        try {
-            final String json = response.body().string();
 
-            videoInfo = getGson().fromJson(json, new TypeToken<VideoInfo>() {
-            }.getType());
-        } catch (IOException e) {
-            throw new ConnectionException(e);
-        }
-        return videoInfo;
+        CLIENT.newCall(request).enqueue(new Callback() {
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                AppContext.getEventBus().post(new VideoInfoResponseEvent(null, e));
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                final String json = response.body().string();
+
+                VideoInfo videoInfo = getGson().fromJson(json, new TypeToken<VideoInfo>() {
+                }.getType());
+
+                AppContext.getEventBus().post(new VideoInfoResponseEvent(videoInfo, null));
+            }
+        });
     }
 
     public static List<Comment> getComments(String id) throws ConnectionException, RemoteException {
@@ -237,7 +247,6 @@ public class RequestHelper {
         } catch (IOException e) {
             throw new ConnectionException(e);
         }
-        checkResponse(response);
         return response;
     }
 
