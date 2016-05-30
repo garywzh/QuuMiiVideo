@@ -39,7 +39,6 @@ import org.garywzh.quumiibox.ui.player.DemoPlayer;
 import org.garywzh.quumiibox.ui.player.DemoPlayer.RendererBuilder;
 import org.garywzh.quumiibox.ui.player.EventLogger;
 import org.garywzh.quumiibox.ui.player.ExtractorRendererBuilder;
-import org.garywzh.quumiibox.ui.player.HlsRendererBuilder;
 import org.garywzh.quumiibox.util.LogUtils;
 
 import java.io.IOException;
@@ -226,8 +225,6 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
     private RendererBuilder getRendererBuilder() {
         String userAgent = Util.getUserAgent(this, "ExoPlayer");
         switch (contentType) {
-            case Util.TYPE_HLS:
-                return new HlsRendererBuilder(this, userAgent, contentUri);
             case Util.TYPE_OTHER:
                 return new ExtractorRendererBuilder(this, userAgent, Uri.parse(contentUri));
             default:

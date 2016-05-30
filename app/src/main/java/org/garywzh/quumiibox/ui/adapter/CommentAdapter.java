@@ -43,7 +43,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             return new CommentViewHolder(view);
         } else {
             final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_reply, parent, false);
-            return new ReplyVIewHolder(mListener, view);
+            return new ReplyViewHolder(mListener, view);
         }
     }
 
@@ -52,7 +52,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         if (holder instanceof CommentViewHolder) {
             ((CommentViewHolder) holder).fillData(mData.get(position));
         } else {
-            ((ReplyVIewHolder) holder).fillData();
+            ((ReplyViewHolder) holder).fillData();
         }
     }
 
@@ -121,13 +121,13 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
-    public static class ReplyVIewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class ReplyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private final OnReplyActionListener mListener;
         private final ImageView mAvatar;
         private final EditText mEditText;
         private final String avatarUrl;
 
-        public ReplyVIewHolder(OnReplyActionListener listener, View itemView) {
+        public ReplyViewHolder(OnReplyActionListener listener, View itemView) {
             super(itemView);
             mListener = listener;
             mAvatar = (ImageView) itemView.findViewById(R.id.avatar_img);
