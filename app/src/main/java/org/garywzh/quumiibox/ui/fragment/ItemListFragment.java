@@ -251,43 +251,31 @@ public class ItemListFragment extends Fragment implements LoaderCallbacks<Loader
         switch (item.type) {
             case "video":
                 intent = new Intent(mContext, VideoActivity.class);
-                Bundle VideoBundle = new Bundle();
-                VideoBundle.putParcelable("item", item);
-                intent.putExtras(VideoBundle);
+                Bundle videoBundle = new Bundle();
+                videoBundle.putParcelable("item", item);
+                intent.putExtras(videoBundle);
                 break;
             case "pic":
-                intent = new Intent(mContext, ImageActivity.class);
-                Bundle PicBundle = new Bundle();
-                PicBundle.putParcelable("item", item);
-                intent.putExtras(PicBundle);
-                break;
             case "longpic":
-                intent = new Intent(mContext, ImageActivity.class);
-                Bundle LongPicBundle = new Bundle();
-                LongPicBundle.putParcelable("item", item);
-                intent.putExtras(LongPicBundle);
-                break;
             case "gif":
                 intent = new Intent(mContext, ImageActivity.class);
-                Bundle GifBundle = new Bundle();
-                GifBundle.putParcelable("item", item);
-                intent.putExtras(GifBundle);
+                Bundle imageBundle = new Bundle();
+                imageBundle.putParcelable("item", item);
+                intent.putExtras(imageBundle);
                 break;
             case "link":
-                intent = new Intent(mContext, TopicActivity.class);
-                Bundle TopicBundle = new Bundle();
-                TopicBundle.putParcelable("item", item);
-                intent.putExtras(TopicBundle);
-                break;
+            case "tuji":
             case "duanzi":
                 intent = new Intent(mContext, TopicActivity.class);
-                Bundle DuanziBundle = new Bundle();
-                DuanziBundle.putParcelable("item", item);
-                intent.putExtras(DuanziBundle);
+                Bundle topicBundle = new Bundle();
+                topicBundle.putParcelable("item", item);
+                intent.putExtras(topicBundle);
                 break;
             default:
-                throw new RuntimeException("unknown type");
+                LogUtils.e(TAG, "unknown type");
+                return false;
         }
+
         startActivity(intent);
         return false;
     }

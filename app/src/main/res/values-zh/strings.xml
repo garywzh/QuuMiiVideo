@@ -58,5 +58,6 @@
     <string name="action_reset">重置</string>
     <string name="action_search">搜索</string>
     <string name="reply">回复</string>
+    <string name="action_view_post">查看详情</string>
 
 </resources>

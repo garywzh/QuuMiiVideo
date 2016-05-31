@@ -1,9 +1,13 @@
 package org.garywzh.quumiibox.ui;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
 
@@ -36,11 +40,28 @@ public class TopicActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_topic, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
-            return true;
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            case R.id.action_view_post:
+                if (mItem.link != null && mItem.link.contains("http")) {
+                    final Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse(mItem.link));
+                    startActivity(intent);
+                    return true;
+                } else {
+                    Toast.makeText(this, "error link", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
         }
 
         return super.onOptionsItemSelected(item);

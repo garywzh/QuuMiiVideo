@@ -61,5 +61,6 @@
     <string name="action_reset">Reset</string>
     <string name="action_search">Search</string>
     <string name="reply">Reply</string>
+    <string name="action_view_post">View post</string>
 
 </resources>
