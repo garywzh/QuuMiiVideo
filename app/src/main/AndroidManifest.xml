@@ -9,7 +9,7 @@
 
     <application
         android:name=".AppContext"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:hardwareAccelerated="true"
         android:largeHeap="true"
         android:icon="@mipmap/ic_launcher"
@@ -50,6 +50,7 @@
         <activity
             android:name=".ui.ImageActivity"
             android:label="@string/title_activity_image"
+            android:theme="@style/AppTheme"
             android:screenOrientation="portrait"
             android:configChanges="keyboardHidden|orientation" />
         <activity
