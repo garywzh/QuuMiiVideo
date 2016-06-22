@@ -208,7 +208,7 @@ public class CategoryFragment extends Fragment implements CategoryAdapter.OnStar
                         @Override
                         public void run() {
                             UserState.getInstance().addCateoryItem(mEditText.getText().toString());
-                            getActivity().runOnUiThread(new Runnable() {
+                            ExecutorUtils.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     mCategoryAdapter.notifyDataSetChanged();
@@ -232,7 +232,7 @@ public class CategoryFragment extends Fragment implements CategoryAdapter.OnStar
                         @Override
                         public void run() {
                             UserState.getInstance().resetCateItemPrefs();
-                            getActivity().runOnUiThread(new Runnable() {
+                            ExecutorUtils.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     mCategoryAdapter.notifyDataSetChanged();
