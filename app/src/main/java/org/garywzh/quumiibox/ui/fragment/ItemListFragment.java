@@ -246,7 +246,7 @@ public class ItemListFragment extends Fragment implements LoaderCallbacks<Loader
     }
 
     @Override
-    public boolean onItemOpen(View view, Item item) {
+    public boolean onItemOpen(Item item) {
         final Intent intent;
         switch (item.type) {
             case "video":

@@ -1,6 +1,5 @@
 package org.garywzh.quumiibox.ui.adapter;
 
-import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,11 +16,11 @@ import java.util.List;
 
 public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private final OnItemActionListener mListener;
+    private final View.OnClickListener mClickListener;
     private List<Item> mData;
 
-    public ItemAdapter(@NonNull OnItemActionListener listener) {
-        mListener = listener;
+    public ItemAdapter(final OnItemActionListener listener) {
+        mClickListener = new OnViewHolderClickListener(listener);
         setHasStableIds(true);
     }
 
@@ -35,13 +34,16 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         if (viewType == Item.TYPE_VIDEO) {
             final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_video, parent, false);
-            return new VideoViewHolder(mListener, view);
+            view.setOnClickListener(mClickListener);
+            return new VideoViewHolder(view);
         } else if (viewType == Item.TYPE_PIC | viewType == Item.TYPE_LONGPIC | viewType == Item.TYPE_GIF) {
             final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_pic, parent, false);
-            return new ImageViewHolder(mListener, view);
+            view.setOnClickListener(mClickListener);
+            return new ImageViewHolder(view);
         } else if (viewType == Item.TYPE_LINK | viewType == Item.TYPE_TUJI | viewType == Item.TYPE_DUANZI) {
             final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_link, parent, false);
-            return new TopicViewHolder(mListener, view);
+            view.setOnClickListener(mClickListener);
+            return new TopicViewHolder(view);
         }
 
         throw new RuntimeException("there is no type that matches the type " + viewType + " + make sure your using types correctly");
@@ -102,27 +104,19 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return type;
     }
 
-    public static class VideoViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class VideoViewHolder extends RecyclerView.ViewHolder {
 
+        public final View mRoot;
         public final ImageView mCoverPic;
         public final TextView mTitle;
         public final TextView mTime;
         public final TextView mReplyCount;
         public final TextView mThumbUpCount;
 
-        private final OnItemActionListener mListener;
-        private Item mItem;
-
         public VideoViewHolder(View view) {
-            this(null, view);
-        }
-
-        public VideoViewHolder(OnItemActionListener listener, View view) {
             super(view);
-            mListener = listener;
 
-            view.setOnClickListener(this);
-
+            mRoot = view;
             mCoverPic = ((ImageView) view.findViewById(R.id.cover_img));
             mTitle = ((TextView) view.findViewById(R.id.tv_title));
             mTime = ((TextView) view.findViewById(R.id.tv_time));
@@ -131,11 +125,7 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
         public void fillData(Item item) {
-            if (item.equals(mItem)) {
-                return;
-            }
-            mItem = item;
-
+            mRoot.setTag(item);
             mTitle.setText(item.subject);
             mTime.setText(item.dateline);
             mThumbUpCount.setText(item.like);
@@ -150,38 +140,21 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     .placeholder(R.drawable.coverpic_default).crossFade()
                     .into(mCoverPic);
         }
-
-        @Override
-        public void onClick(View v) {
-            if (mListener == null) {
-                return;
-            }
-
-            mListener.onItemOpen(v, mItem);
-        }
     }
 
-    public static class ImageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class ImageViewHolder extends RecyclerView.ViewHolder {
 
+        public final View mRoot;
         public final ImageView mCoverPic;
         public final TextView mTitle;
         public final TextView mTime;
         public final TextView mReplyCount;
         public final TextView mThumbUpCount;
 
-        private final OnItemActionListener mListener;
-        private Item mItem;
-
         public ImageViewHolder(View view) {
-            this(null, view);
-        }
-
-        public ImageViewHolder(OnItemActionListener listener, View view) {
             super(view);
-            mListener = listener;
 
-            view.setOnClickListener(this);
-
+            mRoot = view;
             mTitle = ((TextView) view.findViewById(R.id.tv_title));
             mCoverPic = ((ImageView) view.findViewById(R.id.cover_img));
             mTime = ((TextView) view.findViewById(R.id.tv_time));
@@ -190,11 +163,7 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
         public void fillData(Item item) {
-            if (item.equals(mItem)) {
-                return;
-            }
-            mItem = item;
-
+            mRoot.setTag(item);
             mTitle.setText(item.subject);
             mTime.setText(item.dateline);
             mThumbUpCount.setText(item.like);
@@ -210,37 +179,20 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     .placeholder(R.drawable.coverpic_default)
                     .into(mCoverPic);
         }
-
-        @Override
-        public void onClick(View v) {
-            if (mListener == null) {
-                return;
-            }
-
-            mListener.onItemOpen(v, mItem);
-        }
     }
 
-    public static class TopicViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class TopicViewHolder extends RecyclerView.ViewHolder {
 
+        public final View mRoot;
         public final TextView mTitle;
         public final TextView mTime;
         public final TextView mReplyCount;
         public final TextView mThumbUpCount;
 
-        private final OnItemActionListener mListener;
-        private Item mItem;
-
         public TopicViewHolder(View view) {
-            this(null, view);
-        }
-
-        public TopicViewHolder(OnItemActionListener listener, View view) {
             super(view);
-            mListener = listener;
 
-            view.setOnClickListener(this);
-
+            mRoot = view;
             mTitle = ((TextView) view.findViewById(R.id.tv_title));
             mTime = ((TextView) view.findViewById(R.id.tv_time));
             mThumbUpCount = (TextView) view.findViewById(R.id.tv_thumbupcount);
@@ -248,29 +200,30 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
         public void fillData(Item item) {
-            if (item.equals(mItem)) {
-                return;
-            }
-            mItem = item;
-
+            mRoot.setTag(item);
             mTitle.setText(item.subject);
             mTime.setText(item.dateline);
             mThumbUpCount.setText(item.like);
             mReplyCount.setText(item.replynum);
         }
+    }
+
+    private static class OnViewHolderClickListener implements View.OnClickListener {
+        private OnItemActionListener mListener;
+
+        public OnViewHolderClickListener(OnItemActionListener listener) {
+            mListener = listener;
+        }
 
         @Override
         public void onClick(View v) {
-            if (mListener == null) {
+            if (mListener == null)
                 return;
-            }
-
-            mListener.onItemOpen(v, mItem);
+            mListener.onItemOpen((Item) (v.getTag()));
         }
     }
 
     public interface OnItemActionListener {
-
-        boolean onItemOpen(View view, Item item);
+        boolean onItemOpen(Item item);
     }
 }

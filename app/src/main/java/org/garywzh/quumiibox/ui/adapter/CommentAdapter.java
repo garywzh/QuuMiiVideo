@@ -96,7 +96,6 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         private final TextView mUsername;
         private final TextView mContent;
         private final TextView mReplyTime;
-        private Comment mComment;
 
         public CommentViewHolder(View view) {
             super(view);
@@ -107,10 +106,6 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
 
         public void fillData(Comment comment) {
-            if (comment.equals(mComment)) {
-                return;
-            }
-            mComment = comment;
             mUsername.setText(comment.author);
             mContent.setText(comment.message);
             mReplyTime.setText(comment.dateline);
