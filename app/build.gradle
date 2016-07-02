@@ -11,8 +11,8 @@ android {
         applicationId 'org.garywzh.quumiibox'
         minSdkVersion 17
         targetSdkVersion 23
-        versionCode 11
-        versionName '1.2.0'
+        versionCode 12
+        versionName '1.4.0'
         manifestPlaceholders = [UMENG_APPKEY_VALUE: properties.get('umengAppKey'), UMENG_CHANNEL_VALUE: "umeng"]
     }
 
