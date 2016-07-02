@@ -6,7 +6,7 @@
     <string name="action_refresh">刷新</string>
     <string name="developer">开发者</string>
     <string name="introduce">介绍</string>
-    <string name="introduce_detail">趣觅盒子是火鸡岛( http://www.huojidao.com )的一个第三方Android客户端，由garywzh设计开发，数据来自火鸡岛。\n\n作为一个开源软件，程序代码放在github( https://github.com/garywzh/QuumiiBox )上，欢迎大家提出意见或建议。\n\n由于展示效果的原因，来自部分视频源（如秒拍）的视频会转到浏览器播放。</string>
+    <string name="introduce_detail">趣觅盒子是火鸡岛( http://www.huojidao.com )的一个第三方Android客户端，由garywzh设计开发，数据来自火鸡岛。\n\n作为一个开源软件，程序代码放在github( https://github.com/garywzh/QuumiiBox )上，欢迎大家提出意见或建议。</string>
     <string name="thanks">致谢</string>
     <string name="thanks_detail">感谢火鸡岛( http://www.huojidao.com/ )提供的数据</string>
     <string name="no_comments">暂无评论</string>
@@ -59,5 +59,7 @@
     <string name="action_search">搜索</string>
     <string name="reply">回复</string>
     <string name="action_view_post">查看详情</string>
+    <string name="alert_dialog_ok">确定</string>
+    <string name="alert_dialog_cancel">取消</string>
 
 </resources>

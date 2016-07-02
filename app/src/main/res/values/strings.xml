@@ -62,5 +62,7 @@
     <string name="action_search">Search</string>
     <string name="reply">Reply</string>
     <string name="action_view_post">View post</string>
+    <string name="alert_dialog_ok">OK</string>
+    <string name="alert_dialog_cancel">CANCEL</string>
 
 </resources>

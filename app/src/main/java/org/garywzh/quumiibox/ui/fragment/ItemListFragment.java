@@ -42,7 +42,6 @@ public class ItemListFragment extends Fragment implements LoaderCallbacks<Loader
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ItemAdapter mAdapter;
-    private RecyclerView recyclerView;
     private Context mContext;
     private LinearLayoutManager linearLayoutManager;
     private boolean onLoading;
@@ -105,7 +104,7 @@ public class ItemListFragment extends Fragment implements LoaderCallbacks<Loader
     }
 
     private void initRecyclerView() {
-        recyclerView = (RecyclerView) mSwipeRefreshLayout.findViewById(R.id.recycler_view);
+        RecyclerView recyclerView = (RecyclerView) mSwipeRefreshLayout.findViewById(R.id.recycler_view);
 
         linearLayoutManager = new LinearLayoutManager(mSwipeRefreshLayout.getContext());
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -114,8 +113,8 @@ public class ItemListFragment extends Fragment implements LoaderCallbacks<Loader
         recyclerView.setAdapter(mAdapter);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                if (!onLoading && !noMore) {
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE && !onLoading && !noMore) {
                     int visibleItemCount = linearLayoutManager.getChildCount();
                     int totalItemCount = linearLayoutManager.getItemCount();
                     int pastItems = linearLayoutManager.findFirstVisibleItemPosition();

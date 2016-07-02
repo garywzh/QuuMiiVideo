@@ -10,6 +10,7 @@ import org.garywzh.quumiibox.model.UserInfo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 
 public class UserState {
     private static final UserState instance;
@@ -30,16 +31,17 @@ public class UserState {
     public void init() {
         userStatePrefs = AppContext.getInstance().getSharedPreferences("UserStateFile", 0);
         mUserInfo = new UserInfo();
-        mUserInfo.uid = userStatePrefs.getString("uid", null);
-        mUserInfo.username = userStatePrefs.getString("username", null);
-        mUserInfo.nickname = userStatePrefs.getString("nickname", null);
-        mUserInfo.sex = userStatePrefs.getString("sex", null);
-        mUserInfo.avatar = userStatePrefs.getString("avatar", null);
-        mUserInfo.credit = userStatePrefs.getString("credit", null);
-        mUserInfo.residecity = userStatePrefs.getString("residecity", null);
-        mUserInfo.notenum = userStatePrefs.getString("notenum", null);
-        mUserInfo.newpm = userStatePrefs.getString("newpm", null);
-        mUserInfo.note = userStatePrefs.getString("note", null);
+        Map<String, ?> map = userStatePrefs.getAll();
+        mUserInfo.uid = (String) map.get("uid");
+        mUserInfo.username = (String) map.get("username");
+        mUserInfo.nickname = (String) map.get("nickname");
+        mUserInfo.sex = (String) map.get("sex");
+        mUserInfo.avatar = (String) map.get("avatar");
+        mUserInfo.credit = (String) map.get("credit");
+        mUserInfo.residecity = (String) map.get("residecity");
+        mUserInfo.notenum = (String) map.get("notenum");
+        mUserInfo.newpm = (String) map.get("newpm");
+        mUserInfo.note = (String) map.get("note");
 
         mCategoryItems = new ArrayList<>();
         categoryItemsPrefs = AppContext.getInstance().getSharedPreferences("CategoryItemsFile", 0);
@@ -63,17 +65,17 @@ public class UserState {
         userStatePrefs = AppContext.getInstance().getSharedPreferences("UserStateFile", 0);
         final SharedPreferences.Editor userPrefsWriter = userStatePrefs.edit();
 
-        userPrefsWriter.putString("uid", mUserInfo.uid);
-        userPrefsWriter.putString("username", mUserInfo.username);
-        userPrefsWriter.putString("nickname", mUserInfo.nickname);
-        userPrefsWriter.putString("sex", mUserInfo.sex);
-        userPrefsWriter.putString("avatar", mUserInfo.avatar);
-        userPrefsWriter.putString("credit", mUserInfo.credit);
-        userPrefsWriter.putString("residecity", mUserInfo.residecity);
-        userPrefsWriter.putString("notenum", mUserInfo.notenum);
-        userPrefsWriter.putString("newpm", mUserInfo.newpm);
-        userPrefsWriter.putString("note", mUserInfo.note);
-        userPrefsWriter.apply();
+        userPrefsWriter.putString("uid", mUserInfo.uid)
+                .putString("username", mUserInfo.username)
+                .putString("nickname", mUserInfo.nickname)
+                .putString("sex", mUserInfo.sex)
+                .putString("avatar", mUserInfo.avatar)
+                .putString("credit", mUserInfo.credit)
+                .putString("residecity", mUserInfo.residecity)
+                .putString("notenum", mUserInfo.notenum)
+                .putString("newpm", mUserInfo.newpm)
+                .putString("note", mUserInfo.note)
+                .apply();
 
         AppContext.getEventBus().post(new LoginEvent(mUserInfo.username));
     }
