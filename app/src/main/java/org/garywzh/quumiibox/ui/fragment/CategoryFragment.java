@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -17,15 +18,19 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 
 import com.bignerdranch.android.multiselector.ModalMultiSelectorCallback;
 import com.bignerdranch.android.multiselector.MultiSelector;
+import com.google.common.eventbus.Subscribe;
 import com.umeng.analytics.MobclickAgent;
 
+import org.garywzh.quumiibox.AppContext;
 import org.garywzh.quumiibox.R;
 import org.garywzh.quumiibox.common.UserState;
+import org.garywzh.quumiibox.eventbus.CatagoryChangedEvent;
 import org.garywzh.quumiibox.ui.MainActivity;
 import org.garywzh.quumiibox.ui.adapter.CategoryAdapter;
 import org.garywzh.quumiibox.util.ExecutorUtils;
@@ -66,6 +71,12 @@ public class CategoryFragment extends Fragment implements CategoryAdapter.OnStar
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        AppContext.getEventBus().register(this);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         MobclickAgent.onResume(getActivity());
@@ -75,6 +86,12 @@ public class CategoryFragment extends Fragment implements CategoryAdapter.OnStar
     public void onPause() {
         super.onPause();
         MobclickAgent.onPause(getActivity());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        AppContext.getEventBus().unregister(this);
     }
 
     @Override
@@ -154,93 +171,118 @@ public class CategoryFragment extends Fragment implements CategoryAdapter.OnStar
     }
 
     private void showAddItemDialog() {
-        Activity activity = getActivity();
-        int margin_in_dp = 24;
-        final float scale = getResources().getDisplayMetrics().density;
-        int margin_in_px = (int) (margin_in_dp * scale + 0.5f);
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.leftMargin = margin_in_px;
-        params.rightMargin = margin_in_px;
-        final EditText input = new EditText(activity);
-        input.setSingleLine(true);
-        input.setLayoutParams(params);
-        FrameLayout container = new FrameLayout(activity);
-        container.addView(input);
-        OnAddItemDialogClickListener onDialogClickListener = new OnAddItemDialogClickListener(input);
-        new AlertDialog.Builder(getActivity())
-                .setTitle("添加一个标签")
-                .setView(container)
-                .setPositiveButton("确认", onDialogClickListener)
-                .setNegativeButton("取消", onDialogClickListener)
-                .create()
-                .show();
+        AddItemAlertDialogFragment dialogFragment = AddItemAlertDialogFragment.newInstance();
+        dialogFragment.show(getFragmentManager(), "additemdialog");
     }
 
     private void showResetDialog() {
-        OnResetDialogClickListener onResetDialogClickListener = new OnResetDialogClickListener();
-        new AlertDialog.Builder(getActivity())
-                .setMessage("将丢失修改的自定义内容")
-                .setTitle("重置")
-                .setPositiveButton("确认", onResetDialogClickListener)
-                .setNegativeButton("取消", onResetDialogClickListener)
-                .create()
-                .show();
+        ResetAlertDialogFragment dialogFragment = ResetAlertDialogFragment.newInstance();
+        dialogFragment.show(getFragmentManager(), "resetdialog");
     }
 
-    class OnAddItemDialogClickListener implements DialogInterface.OnClickListener {
-        private EditText mEditText;
+    @Subscribe
+    public void onCatagoryChangedEvent(CatagoryChangedEvent e) {
+        mCategoryAdapter.notifyDataSetChanged();
+    }
 
-        public OnAddItemDialogClickListener(EditText editText) {
-            super();
-            mEditText = editText;
+    public static class ResetAlertDialogFragment extends DialogFragment {
+        public static ResetAlertDialogFragment newInstance() {
+            return new ResetAlertDialogFragment();
         }
 
         @Override
-        public void onClick(DialogInterface dialog, int which) {
-            switch (which) {
-                case Dialog.BUTTON_NEGATIVE:
-                    break;
-                case Dialog.BUTTON_POSITIVE:
-                    if (mEditText.getText().toString().trim().length() == 0) {
-                        return;
-                    }
-                    ExecutorUtils.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            UserState.getInstance().addCateoryItem(mEditText.getText().toString());
-                            ExecutorUtils.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mCategoryAdapter.notifyDataSetChanged();
-                                }
-                            });
-                        }
-                    });
-                    break;
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            OnResetDialogClickListener onResetDialogClickListener = new OnResetDialogClickListener();
+            return new AlertDialog.Builder(getActivity())
+                    .setMessage("将丢失修改的自定义内容")
+                    .setTitle("重置")
+                    .setPositiveButton(R.string.alert_dialog_ok, onResetDialogClickListener)
+                    .setNegativeButton(R.string.alert_dialog_cancel, onResetDialogClickListener)
+                    .create();
+        }
+
+        static class OnResetDialogClickListener implements DialogInterface.OnClickListener {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case Dialog.BUTTON_NEGATIVE:
+                        break;
+                    case Dialog.BUTTON_POSITIVE:
+                        ExecutorUtils.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                UserState.getInstance().resetCateItemPrefs();
+                                AppContext.getEventBus().post(new CatagoryChangedEvent());
+                            }
+                        });
+                        break;
+                }
             }
         }
     }
 
-    class OnResetDialogClickListener implements DialogInterface.OnClickListener {
+    public static class AddItemAlertDialogFragment extends DialogFragment {
+
+        public static AddItemAlertDialogFragment newInstance() {
+            return new AddItemAlertDialogFragment();
+        }
+
         @Override
-        public void onClick(DialogInterface dialog, int which) {
-            switch (which) {
-                case Dialog.BUTTON_NEGATIVE:
-                    break;
-                case Dialog.BUTTON_POSITIVE:
-                    ExecutorUtils.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            UserState.getInstance().resetCateItemPrefs();
-                            ExecutorUtils.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mCategoryAdapter.notifyDataSetChanged();
-                                }
-                            });
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            Activity activity = getActivity();
+            int margin_in_dp = 24;
+            final float scale = getResources().getDisplayMetrics().density;
+            int margin_in_px = (int) (margin_in_dp * scale + 0.5f);
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            params.leftMargin = margin_in_px;
+            params.rightMargin = margin_in_px;
+            final EditText input = new EditText(activity);
+            input.setSingleLine(true);
+            input.setLayoutParams(params);
+            FrameLayout container = new FrameLayout(activity);
+            container.addView(input);
+            OnAddItemDialogClickListener onDialogClickListener = new OnAddItemDialogClickListener(input);
+
+            return new AlertDialog.Builder(getActivity())
+                    .setTitle("添加一个标签")
+                    .setView(container)
+                    .setPositiveButton(R.string.alert_dialog_ok, onDialogClickListener)
+                    .setNegativeButton(R.string.alert_dialog_cancel, onDialogClickListener)
+                    .create();
+        }
+
+        @Override
+        public void onActivityCreated(Bundle savedInstanceState) {
+            super.onActivityCreated(savedInstanceState);
+            getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        }
+
+        static class OnAddItemDialogClickListener implements DialogInterface.OnClickListener {
+            private EditText mEditText;
+
+            public OnAddItemDialogClickListener(EditText editText) {
+                super();
+                mEditText = editText;
+            }
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case Dialog.BUTTON_NEGATIVE:
+                        break;
+                    case Dialog.BUTTON_POSITIVE:
+                        if (mEditText.getText().toString().trim().length() == 0) {
+                            return;
                         }
-                    });
-                    break;
+                        ExecutorUtils.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                UserState.getInstance().addCateoryItem(mEditText.getText().toString());
+                                AppContext.getEventBus().post(new CatagoryChangedEvent());
+                            }
+                        });
+                        break;
+                }
             }
         }
     }
