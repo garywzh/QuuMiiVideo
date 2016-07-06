@@ -1,6 +1,5 @@
 package org.garywzh.quumiibox.ui.fragment;
 
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -17,9 +16,6 @@ import com.google.common.eventbus.Subscribe;
 import org.garywzh.quumiibox.AppContext;
 import org.garywzh.quumiibox.R;
 import org.garywzh.quumiibox.common.UserState;
-import org.garywzh.quumiibox.common.exception.ConnectionException;
-import org.garywzh.quumiibox.common.exception.FatalException;
-import org.garywzh.quumiibox.common.exception.RemoteException;
 import org.garywzh.quumiibox.eventbus.UserOperationResponseEvent;
 import org.garywzh.quumiibox.model.Item;
 import org.garywzh.quumiibox.model.OperatInfo;
@@ -27,9 +23,8 @@ import org.garywzh.quumiibox.model.UserOperation;
 import org.garywzh.quumiibox.network.RequestHelper;
 import org.garywzh.quumiibox.util.ExecutorUtils;
 
-/**
- * A simple {@link Fragment} subclass.
- */
+import java.io.IOException;
+
 public class ItemHeaderFragment extends Fragment {
     private static final String TAG = ItemHeaderFragment.class.getSimpleName();
     private static final String ARG_ITEM = "item";
@@ -115,8 +110,8 @@ public class ItemHeaderFragment extends Fragment {
                 public void run() {
                     try {
                         RequestHelper.userOperation(mItem, menuItem);
-                    } catch (ConnectionException | RemoteException e) {
-                        throw new FatalException(e);
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
             });

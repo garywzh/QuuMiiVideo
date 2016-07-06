@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
-import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,23 +15,33 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import org.garywzh.quumiibox.AppContext;
 import org.garywzh.quumiibox.R;
 import org.garywzh.quumiibox.model.Item;
+import org.garywzh.quumiibox.model.ItemList;
+import org.garywzh.quumiibox.network.NetworkHelper;
 import org.garywzh.quumiibox.network.RequestHelper;
 import org.garywzh.quumiibox.ui.ImageActivity;
 import org.garywzh.quumiibox.ui.MainActivity;
 import org.garywzh.quumiibox.ui.TopicActivity;
 import org.garywzh.quumiibox.ui.VideoActivity;
 import org.garywzh.quumiibox.ui.adapter.ItemAdapter;
-import org.garywzh.quumiibox.ui.loader.AsyncTaskLoader.LoaderResult;
-import org.garywzh.quumiibox.ui.loader.ItemListLoader;
 import org.garywzh.quumiibox.util.ListUtils;
 import org.garywzh.quumiibox.util.LogUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ItemListFragment extends Fragment implements LoaderCallbacks<LoaderResult<List<Item>>>, SwipeRefreshLayout.OnRefreshListener, ItemAdapter.OnItemActionListener {
+import rx.Observable;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
+
+public class ItemListFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener, ItemAdapter.OnItemActionListener {
     private static final String TAG = ItemListFragment.class.getSimpleName();
     private static final String ARG_TYPE = "type";
     private static final String ARG_QUERY = "query";
@@ -50,7 +58,8 @@ public class ItemListFragment extends Fragment implements LoaderCallbacks<Loader
     private List<Item> mItems;
     private int mType;
     private String mQueryString;
-    private boolean neverCreateView;
+    private boolean firstLoad;
+    private Subscription mSubscription;
 
     public static ItemListFragment newInstance(int type, String queryString) {
         ItemListFragment fragment = new ItemListFragment();
@@ -77,29 +86,19 @@ public class ItemListFragment extends Fragment implements LoaderCallbacks<Loader
         }
         mItems = new ArrayList<>();
         mCount = 0;
-        neverCreateView = true;
+        firstLoad = true;
         setHasOptionsMenu(true);
+
+        mAdapter = new ItemAdapter(this);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        mSwipeRefreshLayout = (SwipeRefreshLayout) inflater.inflate(R.layout.fragment_item_list,
-                container, false);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) inflater.inflate(R.layout.fragment_item_list, container, false);
         mSwipeRefreshLayout.setOnRefreshListener(this);
         initRecyclerView();
-
-        onLoading = true;
-        if (neverCreateView) {
-            neverCreateView = false;
-            mSwipeRefreshLayout.post(new Runnable() {
-                @Override
-                public void run() {
-                    mSwipeRefreshLayout.setRefreshing(true);
-                }
-            });
-        }
         return mSwipeRefreshLayout;
     }
 
@@ -109,7 +108,6 @@ public class ItemListFragment extends Fragment implements LoaderCallbacks<Loader
         linearLayoutManager = new LinearLayoutManager(mSwipeRefreshLayout.getContext());
         recyclerView.setLayoutManager(linearLayoutManager);
 
-        mAdapter = new ItemAdapter(this);
         recyclerView.setAdapter(mAdapter);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -121,14 +119,7 @@ public class ItemListFragment extends Fragment implements LoaderCallbacks<Loader
                     if ((pastItems + visibleItemCount) >= (totalItemCount - 6)) {
 
                         LogUtils.d(TAG, "scrolled to bottom, loading more");
-                        onLoading = true;
-                        mSwipeRefreshLayout.setRefreshing(true);
-
-                        final ItemListLoader loader = getLoader();
-                        if (loader == null) {
-                            return;
-                        }
-                        loader.setPage(mCount + 1);
+                        loadData();
                     }
                 }
             }
@@ -138,7 +129,6 @@ public class ItemListFragment extends Fragment implements LoaderCallbacks<Loader
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        getLoaderManager().initLoader(0, null, this);
         final MainActivity activity = ((MainActivity) getActivity());
         switch (mType) {
             case TYPE_ALL:
@@ -152,74 +142,107 @@ public class ItemListFragment extends Fragment implements LoaderCallbacks<Loader
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    public Loader<LoaderResult<List<Item>>> onCreateLoader(int id, Bundle args) {
-        return new ItemListLoader(getActivity(), mType, mQueryString);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<LoaderResult<List<Item>>> loader, LoaderResult<List<Item>> result) {
-        if (result.hasException()) {
-            Toast.makeText(getActivity(), "视频列表加载失败 - 网络错误", Toast.LENGTH_LONG).show();
-            mSwipeRefreshLayout.setRefreshing(false);
-            onLoading = false;
-            return;
-        }
-        if (mCount == 0) {
-            mItems.clear();
-            linearLayoutManager.scrollToPositionWithOffset(0, 0);
-        }
-        if (result.mResult == null) {
-            noMore = true;
-        } else {
-            if (result.mResult.size() < RequestHelper.ONCE_LOAD_ITEM_COUNT) {
-                noMore = true;
-                LogUtils.d(TAG, "No more items");
-            }
-            mCount++;
-            ListUtils.mergeListWithoutDuplicates(mItems, result.mResult);
-            mAdapter.setDataSource(mItems);
-        }
-        mSwipeRefreshLayout.setRefreshing(false);
-        onLoading = false;
-        LogUtils.d(TAG, "onLoadFinished called");
-    }
-
-    @Override
-    public void onLoaderReset(Loader<LoaderResult<List<Item>>> loader) {
-        mAdapter.setDataSource(null);
-        LogUtils.d(TAG, "onLoaderReset called");
-    }
-
-    private ItemListLoader getLoader() {
-        return (ItemListLoader) getLoaderManager().<LoaderResult<List<Item>>>getLoader(0);
-    }
-
-    @Override
-    public void onRefresh() {
-        if (!onLoading) {
-            final ItemListLoader loader = getLoader();
-            if (loader == null) {
-                return;
-            }
-
-            onLoading = true;
-            mSwipeRefreshLayout.setRefreshing(true);
-
-            mCount = 0;
-            noMore = false;
-            loader.setPage(mCount + 1);
-        }
-    }
-
-    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         mContext = context;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (firstLoad) {
+            loadData();
+        }
+    }
+
+    private void loadData() {
+        Observable<ItemList> observable;
+        switch (mType) {
+            case ItemListFragment.TYPE_ALL:
+                observable = NetworkHelper.getApiService()
+                        .getItems(mCount * NetworkHelper.ONCE_LOAD_COUNT, (mCount + 1) * NetworkHelper.ONCE_LOAD_COUNT);
+                break;
+            case ItemListFragment.TYPE_SEARCH:
+                observable = NetworkHelper.getApiService()
+                        .search(mCount * NetworkHelper.ONCE_LOAD_COUNT, (mCount + 1) * NetworkHelper.ONCE_LOAD_COUNT, mQueryString);
+                break;
+            default:
+                throw new RuntimeException("error type");
+        }
+        mSubscription = observable
+                .subscribeOn(Schedulers.io())
+                .doOnSubscribe(new Action0() {
+                    @Override
+                    public void call() {
+                        onLoading = true;
+                        mSwipeRefreshLayout.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mSwipeRefreshLayout.setRefreshing(true);
+                            }
+                        });
+                    }
+                })
+                .map(new Func1<ItemList, List<Item>>() {
+                    @Override
+                    public List<Item> call(ItemList itemList) {
+                        return itemList.content;
+                    }
+                })
+                .doOnNext(new Action1<List<Item>>() {
+                    @Override
+                    public void call(List<Item> items) {
+                        if (mCount == 0) {
+                            mItems.clear();
+                        }
+                        if (items == null) {
+                            noMore = true;
+                        } else {
+                            if (items.size() < RequestHelper.ONCE_LOAD_ITEM_COUNT) {
+                                noMore = true;
+                                LogUtils.d(TAG, "No more items");
+                            }
+                            ListUtils.mergeListWithoutDuplicates(mItems, items);
+                        }
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<List<Item>>() {
+                    @Override
+                    public void onCompleted() {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                        Toast.makeText(AppContext.getInstance(), R.string.toast_network_error, Toast.LENGTH_SHORT).show();
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        onLoading = false;
+                    }
+
+                    @Override
+                    public void onNext(List<Item> items) {
+                        if (mCount == 0) {
+                            linearLayoutManager.scrollToPositionWithOffset(0, 0);
+                        }
+                        mAdapter.setDataSource(mItems);
+                        firstLoad = false;
+                        mCount++;
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        onLoading = false;
+                    }
+                });
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mSwipeRefreshLayout.setRefreshing(false);
+        onLoading = false;
+        if (mSubscription != null && !mSubscription.isUnsubscribed()) {
+            mSubscription.unsubscribe();
+            mSubscription = null;
+        }
     }
 
     @Override
@@ -227,6 +250,16 @@ public class ItemListFragment extends Fragment implements LoaderCallbacks<Loader
         super.onDetach();
         mContext = null;
     }
+
+    @Override
+    public void onRefresh() {
+        if (!onLoading) {
+            mCount = 0;
+            noMore = false;
+            loadData();
+        }
+    }
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -271,7 +304,7 @@ public class ItemListFragment extends Fragment implements LoaderCallbacks<Loader
                 intent.putExtras(topicBundle);
                 break;
             default:
-                LogUtils.e(TAG, "unknown type");
+                LogUtils.w(TAG, "unknown type");
                 return false;
         }
 

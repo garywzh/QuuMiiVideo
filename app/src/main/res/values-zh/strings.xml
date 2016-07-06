@@ -61,5 +61,6 @@
     <string name="action_view_post">查看详情</string>
     <string name="alert_dialog_ok">确定</string>
     <string name="alert_dialog_cancel">取消</string>
+    <string name="toast_network_error">网络错误</string>
 
 </resources>

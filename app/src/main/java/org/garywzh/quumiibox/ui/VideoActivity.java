@@ -21,17 +21,14 @@ import com.google.android.exoplayer.MediaCodecTrackRenderer;
 import com.google.android.exoplayer.MediaCodecUtil;
 import com.google.android.exoplayer.drm.UnsupportedDrmException;
 import com.google.android.exoplayer.util.Util;
-import com.google.common.eventbus.Subscribe;
 import com.umeng.analytics.MobclickAgent;
 
 import org.garywzh.quumiibox.AppContext;
 import org.garywzh.quumiibox.BuildConfig;
 import org.garywzh.quumiibox.R;
-import org.garywzh.quumiibox.common.exception.FatalException;
-import org.garywzh.quumiibox.eventbus.VideoInfoResponseEvent;
 import org.garywzh.quumiibox.model.Item;
 import org.garywzh.quumiibox.model.VideoInfo;
-import org.garywzh.quumiibox.network.RequestHelper;
+import org.garywzh.quumiibox.network.NetworkHelper;
 import org.garywzh.quumiibox.ui.fragment.CommentListFragment;
 import org.garywzh.quumiibox.ui.fragment.ItemHeaderFragment;
 import org.garywzh.quumiibox.ui.player.CustomMediaController;
@@ -39,12 +36,15 @@ import org.garywzh.quumiibox.ui.player.DemoPlayer;
 import org.garywzh.quumiibox.ui.player.DemoPlayer.RendererBuilder;
 import org.garywzh.quumiibox.ui.player.EventLogger;
 import org.garywzh.quumiibox.ui.player.ExtractorRendererBuilder;
-import org.garywzh.quumiibox.util.LogUtils;
 
-import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+
+import rx.Subscriber;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Callback, DemoPlayer.Listener {
     private static final String TAG = VideoActivity.class.getSimpleName();
@@ -72,6 +72,8 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
     private DisplayMetrics displayMetrics;
     private String contentUri;
     private int contentType;
+    private String vid;
+    private Subscription mSubscription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +82,8 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
 
         isFullScreen = false;
         Item mItem = getIntent().getExtras().getParcelable("item");
+        if (mItem != null)
+            vid = mItem.vid;
 
         videoRoot = (FrameLayout) findViewById(R.id.video_root);
         videoRoot.setOnClickListener(new View.OnClickListener() {
@@ -111,40 +115,90 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
                 .replace(R.id.headerview, itemHeaderFragment)
                 .replace(R.id.comments, commentListFragment)
                 .commit();
-
-        AppContext.getEventBus().register(this);
-        RequestHelper.fectchVideoInfo(mItem.vid);
     }
 
-    @Subscribe
-    public void onVideoInfoResponseEvent(VideoInfoResponseEvent e) {
-        if (e.exception == null) {
-            VideoInfo videoInfo = e.videoInfo;
-            if (videoInfo == null || videoInfo.url == null) {
-                Toast.makeText(VideoActivity.this, "cannot get video link", Toast.LENGTH_LONG).show();
-            } else {
-                contentUri = videoInfo.url;
-                if (BuildConfig.DEBUG) {
-                    Toast.makeText(this, contentUri, Toast.LENGTH_LONG).show();
-                }
-                contentType = Util.TYPE_OTHER;
-                if (player == null) {
-                    preparePlayer(true);
-                } else {
-                    player.setBackgrounded(false);
-                }
-            }
-        } else {
-            Exception mException = e.exception;
-            LogUtils.w(TAG, "Video load failed", mException);
-            int resId;
-            if (mException instanceof IOException) {
-                resId = R.string.toast_connection_exception;
-            } else {
-                throw new FatalException(mException);
-            }
-            Toast.makeText(this, resId, Toast.LENGTH_LONG).show();
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (contentUri != null) {
+            preparePlayer(false);
+            showControls();
+        } else
+            fetchVideoInfo();
+    }
+
+    private void fetchVideoInfo() {
+        mSubscription = NetworkHelper.getApiService()
+                .fectchVideoInfo(vid)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<VideoInfo>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                        Toast.makeText(AppContext.getInstance(), R.string.toast_connection_exception, Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onNext(VideoInfo videoInfo) {
+                        if (videoInfo == null || videoInfo.url == null) {
+                            Toast.makeText(AppContext.getInstance(), "cannot get video link", Toast.LENGTH_LONG).show();
+                        } else {
+                            contentUri = videoInfo.url;
+                            if (BuildConfig.DEBUG) {
+                                Toast.makeText(AppContext.getInstance(), contentUri, Toast.LENGTH_LONG).show();
+                            }
+                            contentType = Util.TYPE_OTHER;
+                            if (player == null) {
+                                preparePlayer(true);
+                            } else {
+                                player.setBackgrounded(false);
+                            }
+                        }
+                    }
+                });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        releasePlayer();
+        shutterView.setVisibility(View.VISIBLE);
+        if (mSubscription != null && !mSubscription.isUnsubscribed()) {
+            mSubscription.unsubscribe();
+            mSubscription = null;
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        releasePlayer();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isFullScreen) {
+            toggleFullScreen();
+        } else
+            super.onBackPressed();
     }
 
     @Override
@@ -177,6 +231,7 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
 
             initVideoRootAspectRatio();
         }
+        mediaController.updateFullScreen();
     }
 
     private void initVideoRootAspectRatio() {
@@ -186,40 +241,6 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
 
     public boolean isFullScreen() {
         return isFullScreen;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        MobclickAgent.onResume(this);
-
-        if (contentUri != null & player == null) {
-            preparePlayer(true);
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        MobclickAgent.onPause(this);
-
-        releasePlayer();
-        shutterView.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        AppContext.getEventBus().unregister(this);
-        releasePlayer();
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (isFullScreen) {
-            toggleFullScreen();
-        } else
-            super.onBackPressed();
     }
 
     private RendererBuilder getRendererBuilder() {
@@ -258,6 +279,7 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
     private void releasePlayer() {
         if (player != null) {
             playerPosition = player.getCurrentPosition();
+            player.getPlayerControl().pause();
             player.release();
             player = null;
             eventLogger.endSession();
@@ -325,9 +347,7 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
     }
 
     private void showControls() {
-        if (mediaController != null) {
-            mediaController.show();
-        }
+        mediaController.show();
     }
 
     // SurfaceHolder.Callback implementation

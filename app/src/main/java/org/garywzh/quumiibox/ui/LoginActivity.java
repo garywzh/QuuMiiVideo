@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -20,29 +19,29 @@ import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
 
+import org.garywzh.quumiibox.AppContext;
 import org.garywzh.quumiibox.R;
 import org.garywzh.quumiibox.common.UserState;
-import org.garywzh.quumiibox.common.exception.ConnectionException;
-import org.garywzh.quumiibox.common.exception.FatalException;
-import org.garywzh.quumiibox.common.exception.RemoteException;
 import org.garywzh.quumiibox.model.LoginResult;
-import org.garywzh.quumiibox.network.RequestHelper;
+import org.garywzh.quumiibox.model.OperatInfo;
+import org.garywzh.quumiibox.network.NetworkHelper;
 import org.garywzh.quumiibox.util.LogUtils;
 
-/**
- * A login screen that offers login via email/password.
- */
-public class LoginActivity extends AppCompatActivity implements OnClickListener {
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private UserLoginTask mAuthTask = null;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
-    // UI references.
+public class LoginActivity extends AppCompatActivity implements OnClickListener {
+    public static String TAG = LoginActivity.class.getSimpleName();
+    public static String URL_REGISTER = "http://www.huoji.tv/do.php?ac=943c400772ea74e9ed9335e02dc786a3";
+
     private EditText mAccountView;
     private EditText mPwdView;
     private View mProgressView;
     private View mLoginFormView;
+    private Subscription mSubscription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,9 +51,7 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(R.string.title_activity_login);
 
-        // Set up the login form.
         mAccountView = (EditText) findViewById(R.id.account);
-
         mPwdView = (EditText) findViewById(R.id.password);
         mPwdView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             private int mActionIdSignIn = getResources().getInteger(R.integer.id_action_sign);
@@ -70,7 +67,6 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
         });
 
         Button mLogin = (Button) findViewById(R.id.login);
-
         if (mLogin != null) {
             mLogin.setOnClickListener(this);
         }
@@ -78,6 +74,7 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
         if (signUp != null) {
             signUp.setOnClickListener(this);
         }
+
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
     }
@@ -90,21 +87,12 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
                 break;
             case R.id.sign_up:
                 Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setData(Uri.parse("http://www.huoji.tv/do.php?ac=943c400772ea74e9ed9335e02dc786a3"));
+                i.setData(Uri.parse(URL_REGISTER));
                 startActivity(i);
                 break;
         }
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == android.R.id.home) {
-            onBackPressed();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 
     /**
      * Attempts to sign in or register the account specified by the login form.
@@ -112,15 +100,13 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
      * errors are presented and no actual login attempt is made.
      */
     public void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
-        // Reset errors.
+
         mAccountView.setError(null);
         mPwdView.setError(null);
-        // Store values at the time of the login attempt.
+
         String email = mAccountView.getText().toString();
         String password = mPwdView.getText().toString();
+
         boolean cancel = false;
         View focusView = null;
         // Check for a valid password, if the user entered one.
@@ -140,11 +126,46 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
             // form field with an error.
             focusView.requestFocus();
         } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+
+            mSubscription = NetworkHelper.getApiService()
+                    .login(email, password)
+                    .subscribeOn(Schedulers.io())
+                    .map(new Func1<LoginResult, Boolean>() {
+                        @Override
+                        public Boolean call(LoginResult loginResult) {
+                            if (loginResult != null && loginResult.operatinfo.status == OperatInfo.STATUS_LOGIN_SUCCESS) {
+                                UserState.getInstance().login(loginResult);
+                                return true;
+                            }
+                            return false;
+                        }
+                    })
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Subscriber<Boolean>() {
+                        @Override
+                        public void onCompleted() {
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            showProgress(false);
+                            e.printStackTrace();
+                            Toast.makeText(AppContext.getInstance(), R.string.toast_network_error, Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onNext(Boolean success) {
+                            showProgress(false);
+                            if (success) {
+                                onLoginSuccess(UserState.getInstance().getUsername());
+                            } else {
+                                LoginActivity.this.mPwdView.setError(getString(R.string.error_incorrect_password));
+                                LoginActivity.this.mPwdView.requestFocus();
+                                LogUtils.w(TAG, "login failed");
+                            }
+                        }
+                    });
         }
     }
 
@@ -192,66 +213,22 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener 
         MobclickAgent.onPause(this);
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-        private final String TAG = UserLoginTask.class.getSimpleName();
-        private final String mUsername;
-        private final String mPassword;
-        private Exception mException;
-
-        UserLoginTask(String username, String password) {
-            mUsername = username;
-            mPassword = password;
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mSubscription != null && !mSubscription.isUnsubscribed()) {
+            mSubscription.unsubscribe();
+            mSubscription = null;
         }
+    }
 
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            try {
-                final LoginResult result = RequestHelper.login(mUsername, mPassword);
-                if (result != null) {
-                    UserState.getInstance().login(result);
-                    return true;
-                }
-            } catch (ConnectionException | RemoteException e) {
-                mException = e;
-            }
-            return false;
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            onBackPressed();
+            return true;
         }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                onLoginSuccess(mUsername);
-                return;
-            }
-            if (mException == null) {
-                LoginActivity.this.mPwdView.setError(getString(R.string.error_incorrect_password));
-                LoginActivity.this.mPwdView.requestFocus();
-                return;
-            }
-            LogUtils.w(TAG, "login failed", mException);
-
-            int resId;
-            if (mException instanceof ConnectionException) {
-                resId = R.string.toast_connection_exception;
-            } else if (mException instanceof RemoteException) {
-                resId = R.string.toast_remote_exception;
-            } else {
-                throw new FatalException(mException);
-            }
-            Toast.makeText(LoginActivity.this, resId, Toast.LENGTH_LONG).show();
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
+        return super.onOptionsItemSelected(item);
     }
 }

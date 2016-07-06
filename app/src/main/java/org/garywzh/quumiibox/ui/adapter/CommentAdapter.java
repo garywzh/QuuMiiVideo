@@ -132,8 +132,8 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
 
         public void fillData() {
-            Glide.with(mAvatar.getContext()).load(avatarUrl)
-                    .placeholder(R.drawable.avatar_default).crossFade()
+            Glide.with(mAvatar.getContext()).load(avatarUrl).asBitmap()
+                    .placeholder(R.drawable.avatar_default)
                     .into(mAvatar);
         }
 

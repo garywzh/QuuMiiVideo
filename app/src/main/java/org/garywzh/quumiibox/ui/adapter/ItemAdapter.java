@@ -174,8 +174,8 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private void setCoverPic(Item item) {
             final String url = item.img;
-            Glide.with(mCoverPic.getContext()).load(url)
-                    .placeholder(R.drawable.coverpic_default).crossFade()
+            Glide.with(mCoverPic.getContext()).load(url).asBitmap()
+                    .placeholder(R.drawable.coverpic_default)
                     .into(mCoverPic);
         }
     }

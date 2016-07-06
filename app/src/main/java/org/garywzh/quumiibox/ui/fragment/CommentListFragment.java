@@ -2,13 +2,10 @@ package org.garywzh.quumiibox.ui.fragment;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
-import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -24,27 +21,31 @@ import com.google.common.eventbus.Subscribe;
 
 import org.garywzh.quumiibox.AppContext;
 import org.garywzh.quumiibox.R;
-import org.garywzh.quumiibox.common.exception.ConnectionException;
-import org.garywzh.quumiibox.common.exception.RemoteException;
 import org.garywzh.quumiibox.eventbus.UserReplyResponseEvent;
 import org.garywzh.quumiibox.model.Comment;
 import org.garywzh.quumiibox.model.OperatInfo;
+import org.garywzh.quumiibox.network.NetworkHelper;
 import org.garywzh.quumiibox.network.RequestHelper;
 import org.garywzh.quumiibox.ui.adapter.CommentAdapter;
-import org.garywzh.quumiibox.ui.loader.AsyncTaskLoader.LoaderResult;
-import org.garywzh.quumiibox.ui.loader.CommentListLoader;
 import org.garywzh.quumiibox.util.ExecutorUtils;
-import org.garywzh.quumiibox.util.LogUtils;
 
+import java.io.IOException;
 import java.util.List;
 
-public class CommentListFragment extends Fragment implements LoaderCallbacks<LoaderResult<List<Comment>>>, CommentAdapter.OnReplyActionListener {
+import rx.Subscriber;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+
+public class CommentListFragment extends Fragment implements CommentAdapter.OnReplyActionListener {
     private static final String TAG = CommentListFragment.class.getSimpleName();
     private static final String ARG_ID = "id";
 
     private String blogId;
     private RecyclerView commentList;
     private CommentAdapter mCommentAdapter;
+    private Subscription mSubscription;
+    private boolean loaded = false;
 
     public CommentListFragment() {
         // Required empty public constructor
@@ -90,42 +91,43 @@ public class CommentListFragment extends Fragment implements LoaderCallbacks<Loa
     public void onStart() {
         super.onStart();
         AppContext.getEventBus().register(this);
-        getLoaderManager().initLoader(0, null, this);
+        if (!loaded)
+            loadData();
+    }
+
+    private void loadData() {
+        mSubscription = NetworkHelper.getApiService()
+                .getComments(blogId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<List<Comment>>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                        Toast.makeText(AppContext.getInstance(), R.string.toast_network_error, Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onNext(List<Comment> comments) {
+                        mCommentAdapter.setDataSource(comments);
+                        loaded = true;
+                    }
+                });
     }
 
     @Override
-    public Loader<LoaderResult<List<Comment>>> onCreateLoader(int id, Bundle args) {
-        return new CommentListLoader(getActivity(), blogId);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<LoaderResult<List<Comment>>> loader, LoaderResult<List<Comment>> result) {
-        if (result.hasException()) {
-            Toast.makeText(getActivity(), "评论加载失败 - 网络错误", Toast.LENGTH_LONG).show();
-            return;
+    public void onStop() {
+        super.onStop();
+        AppContext.getEventBus().unregister(this);
+        if (mSubscription != null && !mSubscription.isUnsubscribed()) {
+            mSubscription.unsubscribe();
+            mSubscription = null;
         }
-
-        mCommentAdapter.setDataSource(result.mResult);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<LoaderResult<List<Comment>>> loader) {
-        mCommentAdapter.setDataSource(null);
-        LogUtils.d(TAG, "onLoaderReset called");
-    }
-
-    private CommentListLoader getLoader() {
-        return (CommentListLoader) getLoaderManager().<LoaderResult<List<Comment>>>getLoader(0);
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
     }
 
     @Override
@@ -133,11 +135,6 @@ public class CommentListFragment extends Fragment implements LoaderCallbacks<Loa
         showReplyDialog();
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        AppContext.getEventBus().unregister(this);
-    }
 
     private void showReplyDialog() {
         ReplyAlertDialogFragment dialogFragment = ReplyAlertDialogFragment.newInstance(blogId);
@@ -212,8 +209,9 @@ public class CommentListFragment extends Fragment implements LoaderCallbacks<Loa
                             public void run() {
                                 try {
                                     RequestHelper.sentReply(mBlogId, mEditText.getText().toString());
-                                } catch (ConnectionException | RemoteException e) {
-                                    //
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                    Toast.makeText(AppContext.getInstance(), R.string.toast_network_error, Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });
@@ -227,7 +225,7 @@ public class CommentListFragment extends Fragment implements LoaderCallbacks<Loa
     public void onUserReplyResponseEvent(UserReplyResponseEvent e) {
         if (e.response.contains(OperatInfo.MESSAGE_SUCCESS)) {
             Toast.makeText(getActivity(), getString(R.string.sueeccd), Toast.LENGTH_SHORT).show();
-            getLoader().onContentChanged();
+            loadData();
         } else {
             Toast.makeText(getActivity(), e.response, Toast.LENGTH_SHORT).show();
         }
