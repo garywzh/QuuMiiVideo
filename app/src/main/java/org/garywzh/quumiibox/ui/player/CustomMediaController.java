@@ -3,7 +3,6 @@ package org.garywzh.quumiibox.ui.player;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,12 +19,14 @@ import com.google.android.exoplayer.ExoPlayer;
 
 import org.garywzh.quumiibox.R;
 import org.garywzh.quumiibox.ui.VideoActivity;
+import org.garywzh.quumiibox.util.LogUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.Formatter;
 import java.util.Locale;
 
 public class CustomMediaController extends FrameLayout implements DemoPlayer.Listener {
+    private static String TAG = CustomMediaController.class.getSimpleName();
 
     private MediaController.MediaPlayerControl mPlayer;
     private Context mContext;
@@ -36,7 +37,8 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
     private boolean mShowing;
     private boolean mDragging;
     private boolean isEnd = false;
-    private static final int sDefaultTimeout = 3000;
+    private boolean progressUpdating = false;
+    private static final int TIME_OUT = 3000;
     private static final int FADE_OUT = 1;
     private static final int SHOW_PROGRESS = 2;
     StringBuilder mFormatBuilder;
@@ -67,21 +69,6 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
         mAnchor = view;
         removeAllViews();
         addControllerView();
-    }
-
-    @Override
-    public void onError(Exception e) {
-    }
-
-    @Override
-    public void onStateChanged(boolean playWhenReady, int playbackState) {
-        if (playbackState == ExoPlayer.STATE_ENDED) {
-            isEnd = true;
-            updatePausePlay();
-            show();
-        } else {
-            isEnd = false;
-        }
     }
 
     @Override
@@ -117,38 +104,62 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
         mFormatter = new Formatter(mFormatBuilder, Locale.getDefault());
     }
 
-    public void show() {
-        if (mPlayer != null) {
-            show(!isEnd && mPlayer.isPlaying());
-        }
+    @Override
+    public void onError(Exception e) {
     }
 
-    public void show(boolean autoHide) {
-        if (!mShowing && mAnchor != null) {
-            setProgress();
-            mHandler.sendEmptyMessage(SHOW_PROGRESS);
+    @Override
+    public void onStateChanged(boolean playWhenReady, int playbackState) {
+        switch (playbackState) {
+            case ExoPlayer.STATE_PREPARING:
+                LogUtils.d(TAG, "-----------preparing-----------");
+                break;
+            case ExoPlayer.STATE_BUFFERING:
+                LogUtils.d(TAG, "-----------buffering-----------");
+                break;
+            case ExoPlayer.STATE_READY:
+                isEnd = false;
+                if (!mPlayer.isPlaying()) {
+                    mHandler.removeMessages(SHOW_PROGRESS);
+                    progressUpdating = false;
+                } else if (!progressUpdating) {
+                    Message message = mHandler.obtainMessage(SHOW_PROGRESS);
+                    mHandler.sendMessage(message);
+                    progressUpdating = true;
+                }
+                LogUtils.d(TAG, "-----------ready-----------");
+                break;
+            case ExoPlayer.STATE_ENDED:
+                isEnd = true;
+                LogUtils.d(TAG, "-----------ended-----------");
+                break;
+        }
+        if (!isEnd)
+            updatePausePlay();
+    }
 
+    public void show() {
+        if (!mShowing && mAnchor != null) {
             FrameLayout.LayoutParams tlp = new FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     Gravity.BOTTOM
             );
-
             mAnchor.addView(this, tlp);
             mShowing = true;
         }
-        updatePausePlay();
-        updateFullScreen();
-
-        mHandler.removeMessages(FADE_OUT);
-        if (autoHide) {
-            Message msg = mHandler.obtainMessage(FADE_OUT);
-            mHandler.sendMessageDelayed(msg, sDefaultTimeout);
-        }
+        if (!isEnd)
+            pendingFadeOut();
     }
 
     public boolean isShowing() {
         return mShowing;
+    }
+
+    public void pendingFadeOut() {
+        mHandler.removeMessages(FADE_OUT);
+        Message message = mHandler.obtainMessage(FADE_OUT);
+        mHandler.sendMessageDelayed(message, TIME_OUT);
     }
 
     /**
@@ -161,9 +172,8 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
 
         try {
             mAnchor.removeView(this);
-            mHandler.removeMessages(SHOW_PROGRESS);
         } catch (IllegalArgumentException ex) {
-            Log.w("MediaController", "already removed");
+            LogUtils.w("MediaController", "already removed");
         }
         mShowing = false;
     }
@@ -194,10 +204,11 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
             if (duration > 0) {
                 // use long to avoid overflow
                 long pos = 1000L * position / duration;
+                LogUtils.d(TAG, "position: " + pos);
                 mProgress.setProgress((int) pos);
             }
             int percent = mPlayer.getBufferPercentage();
-            mProgress.setSecondaryProgress(percent * 10);
+            mProgress.setSecondaryProgress(percent);
         }
 
         if (mEndTime != null)
@@ -211,14 +222,14 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
     private View.OnClickListener mPauseListener = new View.OnClickListener() {
         public void onClick(View v) {
             doPauseResume();
-            show();
+            pendingFadeOut();
         }
     };
 
     private View.OnClickListener mFullscreenListener = new View.OnClickListener() {
         public void onClick(View v) {
             doToggleFullscreen();
-            show();
+            pendingFadeOut();
         }
     };
 
@@ -258,6 +269,8 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
         if (isEnd) {
             mPlayer.seekTo(0);
             isEnd = false;
+            if (!mPlayer.isPlaying())
+                mPlayer.start();
         } else {
             if (mPlayer.isPlaying()) {
                 mPlayer.pause();
@@ -265,7 +278,6 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
                 mPlayer.start();
             }
         }
-        updatePausePlay();
     }
 
     private void doToggleFullscreen() {
@@ -276,31 +288,12 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
         ((VideoActivity) mContext).toggleFullScreen();
     }
 
-    // There are two scenarios that can trigger the seekbar listener to trigger:
-    //
-    // The first is the user using the touchpad to adjust the posititon of the
-    // seekbar's thumb. In this case onStartTrackingTouch is called followed by
-    // a number of onProgressChanged notifications, concluded by onStopTrackingTouch.
-    // We're setting the field "mDragging" to true for the duration of the dragging
-    // session to avoid jumps in the position in case of ongoing playback.
-    //
-    // The second scenario involves the user operating the scroll ball, in this
-    // case there WON'T BE onStartTrackingTouch/onStopTrackingTouch notifications,
-    // we will simply apply the updated position without suspending regular updates.
     private OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
 
         @Override
         public void onStartTrackingTouch(SeekBar bar) {
-            show(true);
-
             mDragging = true;
-
-            // By removing these pending progress messages we make sure
-            // that a) we won't update the progress while the user adjusts
-            // the seekbar and b) once the user is done dragging the thumb
-            // we will post one of these messages to the queue again and
-            // this ensures that there will be exactly one message queued up.
-            mHandler.removeMessages(SHOW_PROGRESS);
+            mHandler.removeMessages(FADE_OUT);
         }
 
         @Override
@@ -308,7 +301,6 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
             if (mPlayer == null) {
                 return;
             }
-
             if (!fromuser) {
                 // We're not interested in programmatically generated changes to
                 // the progress bar's position.
@@ -325,14 +317,7 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
         @Override
         public void onStopTrackingTouch(SeekBar bar) {
             mDragging = false;
-            setProgress();
-            updatePausePlay();
-            show();
-
-            // Ensure that progress is properly updated in the future,
-            // the call to show() does not guarantee this because it is a
-            // no-op if we are already showing.
-            mHandler.sendEmptyMessage(SHOW_PROGRESS);
+            pendingFadeOut();
         }
     };
 
@@ -353,13 +338,18 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
             int pos;
             switch (msg.what) {
                 case FADE_OUT:
-                    view.hide();
+                    if (!view.mDragging && view.mShowing && !view.isEnd && view.mPlayer.isPlaying())
+                        view.hide();
                     break;
                 case SHOW_PROGRESS:
                     pos = view.setProgress();
-                    if (!view.mDragging && view.mShowing && view.mPlayer.isPlaying()) {
+                    if (!view.isEnd) {
                         msg = obtainMessage(SHOW_PROGRESS);
                         sendMessageDelayed(msg, 1000 - (pos % 1000));
+                    } else {
+                        view.progressUpdating = false;
+                        view.updatePausePlay();
+                        view.show();
                     }
                     break;
             }
