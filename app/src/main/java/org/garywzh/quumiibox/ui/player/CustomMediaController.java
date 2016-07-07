@@ -34,10 +34,13 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
     private View mRoot;
     private ProgressBar mProgress;
     private TextView mEndTime, mCurrentTime;
+    private ProgressBar mLoadingView;
+    private View mControllerView;
     private boolean mShowing;
     private boolean mDragging;
     private boolean isEnd = false;
     private boolean progressUpdating = false;
+    private int mPlaybackState;
     private static final int TIME_OUT = 3000;
     private static final int FADE_OUT = 1;
     private static final int SHOW_PROGRESS = 2;
@@ -83,6 +86,9 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
     }
 
     private void initControllerView(View v) {
+        mControllerView = v.findViewById(R.id.controller_view);
+        mLoadingView = (ProgressBar) v.findViewById(R.id.loading_view);
+
         mPauseButton = (ImageButton) v.findViewById(R.id.pause);
         mPauseButton.setOnClickListener(mPauseListener);
 
@@ -110,14 +116,20 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
 
     @Override
     public void onStateChanged(boolean playWhenReady, int playbackState) {
+        mPlaybackState = playbackState;
         switch (playbackState) {
             case ExoPlayer.STATE_PREPARING:
+                showProgress(true);
+                show();
                 LogUtils.d(TAG, "-----------preparing-----------");
                 break;
             case ExoPlayer.STATE_BUFFERING:
+                show();
                 LogUtils.d(TAG, "-----------buffering-----------");
                 break;
             case ExoPlayer.STATE_READY:
+                showProgress(false);
+                pendingFadeOut();
                 isEnd = false;
                 if (!mPlayer.isPlaying()) {
                     mHandler.removeMessages(SHOW_PROGRESS);
@@ -130,12 +142,24 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
                 LogUtils.d(TAG, "-----------ready-----------");
                 break;
             case ExoPlayer.STATE_ENDED:
+                showProgress(false);
                 isEnd = true;
                 LogUtils.d(TAG, "-----------ended-----------");
                 break;
         }
         if (!isEnd)
             updatePausePlay();
+    }
+
+    private void showProgress(boolean showProgress) {
+        mControllerView.setVisibility(showProgress ? GONE : VISIBLE);
+        mLoadingView.setVisibility(showProgress ? VISIBLE : GONE);
+    }
+
+    public void showControls() {
+        show();
+        if (!isEnd)
+            pendingFadeOut();
     }
 
     public void show() {
@@ -148,8 +172,6 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
             mAnchor.addView(this, tlp);
             mShowing = true;
         }
-        if (!isEnd)
-            pendingFadeOut();
     }
 
     public boolean isShowing() {
@@ -167,6 +189,11 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
      */
     public void hide() {
         if (mAnchor == null) {
+            return;
+        }
+
+        if (mPlaybackState == ExoPlayer.STATE_PREPARING
+                || mPlaybackState == ExoPlayer.STATE_BUFFERING) {
             return;
         }
 
@@ -290,6 +317,8 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
 
     private OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
 
+        private long mProgress;
+
         @Override
         public void onStartTrackingTouch(SeekBar bar) {
             mDragging = true;
@@ -306,17 +335,16 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
                 // the progress bar's position.
                 return;
             }
-
             long duration = mPlayer.getDuration();
-            long newposition = (duration * progress) / 1000L;
-            mPlayer.seekTo((int) newposition);
+            mProgress = (duration * progress) / 1000L;
             if (mCurrentTime != null)
-                mCurrentTime.setText(stringForTime((int) newposition));
+                mCurrentTime.setText(stringForTime((int) mProgress));
         }
 
         @Override
         public void onStopTrackingTouch(SeekBar bar) {
             mDragging = false;
+            mPlayer.seekTo((int) mProgress);
             pendingFadeOut();
         }
     };

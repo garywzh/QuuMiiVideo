@@ -120,10 +120,10 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
     @Override
     protected void onStart() {
         super.onStart();
-        if (contentUri != null) {
+        showControls();
+        if (contentUri != null)
             preparePlayer(false);
-            showControls();
-        } else
+        else
             fetchVideoInfo();
     }
 
@@ -347,7 +347,7 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
     }
 
     private void showControls() {
-        mediaController.show();
+        mediaController.showControls();
     }
 
     // SurfaceHolder.Callback implementation

@@ -21,6 +21,6 @@ proguard/
 # Log Files
 *.log
 
-app/app.iml
+*.iml
 
 .DS_Store
