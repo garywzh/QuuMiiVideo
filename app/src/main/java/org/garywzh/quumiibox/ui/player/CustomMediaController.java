@@ -156,6 +156,13 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
         mControllerView.setVisibility(showProgress ? GONE : VISIBLE);
     }
 
+    public void toggleControlsVisibility() {
+        if (mShowing)
+            hide();
+        else
+            showControls();
+    }
+
     public void showControls() {
         show();
         if (!isEnd)
@@ -175,11 +182,7 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
         mShowing = true;
     }
 
-    public boolean isShowing() {
-        return mShowing;
-    }
-
-    public void pendingFadeOut() {
+    private void pendingFadeOut() {
         mHandler.removeMessages(FADE_OUT);
         Message message = mHandler.obtainMessage(FADE_OUT);
         mHandler.sendMessageDelayed(message, TIME_OUT);
@@ -194,11 +197,7 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
 
         if (mPlaybackState == ExoPlayer.STATE_READY
                 || mPlaybackState == ExoPlayer.STATE_ENDED) {
-            try {
-                mAnchor.removeView(this);
-            } catch (IllegalArgumentException ex) {
-                LogUtils.w("MediaController", "already removed");
-            }
+            mAnchor.removeView(this);
             mShowing = false;
         }
     }
@@ -258,7 +257,7 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
         }
     };
 
-    public void updatePausePlay() {
+    private void updatePausePlay() {
         if (mRoot == null || mPauseButton == null || mPlayer == null) {
             return;
         }
@@ -364,7 +363,7 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
             int pos;
             switch (msg.what) {
                 case FADE_OUT:
-                    if (!view.mDragging && view.mShowing && !view.isEnd && view.mPlayer.isPlaying())
+                    if (!view.mDragging && !view.isEnd && view.mPlayer.isPlaying())
                         view.hide();
                     break;
                 case SHOW_PROGRESS:

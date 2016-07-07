@@ -1,6 +1,5 @@
 package org.garywzh.quumiibox.ui;
 
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,7 +18,6 @@ import com.google.android.exoplayer.ExoPlaybackException;
 import com.google.android.exoplayer.ExoPlayer;
 import com.google.android.exoplayer.MediaCodecTrackRenderer;
 import com.google.android.exoplayer.MediaCodecUtil;
-import com.google.android.exoplayer.drm.UnsupportedDrmException;
 import com.google.android.exoplayer.util.Util;
 import com.umeng.analytics.MobclickAgent;
 
@@ -36,6 +34,7 @@ import org.garywzh.quumiibox.ui.player.DemoPlayer;
 import org.garywzh.quumiibox.ui.player.DemoPlayer.RendererBuilder;
 import org.garywzh.quumiibox.ui.player.EventLogger;
 import org.garywzh.quumiibox.ui.player.ExtractorRendererBuilder;
+import org.garywzh.quumiibox.util.LogUtils;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
@@ -71,6 +70,7 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
 
     private DisplayMetrics displayMetrics;
     private String contentUri;
+    private boolean shouldPortrait;
     private int contentType;
     private String vid;
     private Subscription mSubscription;
@@ -150,8 +150,9 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
                             Toast.makeText(AppContext.getInstance(), "cannot get video link", Toast.LENGTH_LONG).show();
                         } else {
                             contentUri = videoInfo.url;
+                            LogUtils.d(TAG, contentUri);
                             if (BuildConfig.DEBUG) {
-                                Toast.makeText(AppContext.getInstance(), contentUri, Toast.LENGTH_LONG).show();
+                                Toast.makeText(AppContext.getInstance(), contentUri, Toast.LENGTH_SHORT).show();
                             }
                             contentType = Util.TYPE_OTHER;
                             if (player == null) {
@@ -201,13 +202,6 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
             super.onBackPressed();
     }
 
-    @Override
-    public void onNewIntent(Intent intent) {
-        releasePlayer();
-        playerPosition = 0;
-        setIntent(intent);
-    }
-
     public void toggleFullScreen() {
         if (!isFullScreen) {
             View decorView = getWindow().getDecorView();
@@ -218,15 +212,17 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
                             | View.SYSTEM_UI_FLAG_FULLSCREEN
                             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
 
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            if (!shouldPortrait)
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
             isFullScreen = true;
 
             videoRoot.setLayoutParams(new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, displayMetrics.widthPixels));
+                    LinearLayout.LayoutParams.MATCH_PARENT, shouldPortrait ? displayMetrics.heightPixels : displayMetrics.widthPixels));
         } else {
             View decorView = getWindow().getDecorView();
             decorView.setSystemUiVisibility(0);
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            if (!shouldPortrait)
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             isFullScreen = false;
 
             initVideoRootAspectRatio();
@@ -299,13 +295,7 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
     @Override
     public void onError(Exception e) {
         String errorString = null;
-        if (e instanceof UnsupportedDrmException) {
-            // Special case DRM failures.
-            UnsupportedDrmException unsupportedDrmException = (UnsupportedDrmException) e;
-            errorString = Util.SDK_INT < 18 ? "error_drm_not_supported"
-                    : unsupportedDrmException.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
-                    ? "error_drm_unsupported_scheme" : "R.string.error_drm_unknown";
-        } else if (e instanceof ExoPlaybackException
+        if (e instanceof ExoPlaybackException
                 && e.getCause() instanceof MediaCodecTrackRenderer.DecoderInitializationException) {
             // Special case for decoder initialization failures.
             MediaCodecTrackRenderer.DecoderInitializationException decoderInitializationException =
@@ -333,17 +323,16 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
     public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees,
                                    float pixelWidthAspectRatio) {
         shutterView.setVisibility(View.GONE);
-        videoFrame.setAspectRatio(height == 0 ? 1 : (width * pixelWidthAspectRatio) / height);
+        float aspectRatio = height == 0 ? 1 : (width * pixelWidthAspectRatio) / height;
+        LogUtils.d(TAG, "AspectRatio: " + String.valueOf(aspectRatio));
+        //宽高比小于1的视频在全屏时显示为竖直方向
+        shouldPortrait = aspectRatio < 1;
+        videoFrame.setAspectRatio(aspectRatio);
     }
 
     // User controls
-
     private void toggleControlsVisibility() {
-        if (mediaController.isShowing()) {
-            mediaController.hide();
-        } else {
-            showControls();
-        }
+        mediaController.toggleControlsVisibility();
     }
 
     private void showControls() {
@@ -351,7 +340,6 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
     }
 
     // SurfaceHolder.Callback implementation
-
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         if (player != null) {
