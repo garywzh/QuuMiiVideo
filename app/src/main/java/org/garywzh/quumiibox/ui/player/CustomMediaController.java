@@ -36,7 +36,7 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
     private TextView mEndTime, mCurrentTime;
     private ProgressBar mLoadingView;
     private View mControllerView;
-    private boolean mShowing;
+    private boolean mShowing = false;
     private boolean mDragging;
     private boolean isEnd = false;
     private boolean progressUpdating = false;
@@ -152,8 +152,8 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
     }
 
     private void showProgress(boolean showProgress) {
-        mControllerView.setVisibility(showProgress ? GONE : VISIBLE);
         mLoadingView.setVisibility(showProgress ? VISIBLE : GONE);
+        mControllerView.setVisibility(showProgress ? GONE : VISIBLE);
     }
 
     public void showControls() {
@@ -163,15 +163,16 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
     }
 
     public void show() {
-        if (!mShowing && mAnchor != null) {
-            FrameLayout.LayoutParams tlp = new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    Gravity.BOTTOM
-            );
-            mAnchor.addView(this, tlp);
-            mShowing = true;
-        }
+        if (mShowing || mAnchor == null)
+            return;
+
+        FrameLayout.LayoutParams tlp = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                Gravity.BOTTOM
+        );
+        mAnchor.addView(this, tlp);
+        mShowing = true;
     }
 
     public boolean isShowing() {
@@ -188,21 +189,18 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
      * Remove the controller from the screen.
      */
     public void hide() {
-        if (mAnchor == null) {
+        if (!mShowing || mAnchor == null)
             return;
-        }
 
-        if (mPlaybackState == ExoPlayer.STATE_PREPARING
-                || mPlaybackState == ExoPlayer.STATE_BUFFERING) {
-            return;
+        if (mPlaybackState == ExoPlayer.STATE_READY
+                || mPlaybackState == ExoPlayer.STATE_ENDED) {
+            try {
+                mAnchor.removeView(this);
+            } catch (IllegalArgumentException ex) {
+                LogUtils.w("MediaController", "already removed");
+            }
+            mShowing = false;
         }
-
-        try {
-            mAnchor.removeView(this);
-        } catch (IllegalArgumentException ex) {
-            LogUtils.w("MediaController", "already removed");
-        }
-        mShowing = false;
     }
 
     private String stringForTime(int timeMs) {
