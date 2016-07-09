@@ -6,6 +6,8 @@ bin/
 gen/
 /.idea/libraries
 
+*.iml
+
 # Gradle files
 .gradle/
 build/
@@ -20,7 +22,5 @@ proguard/
 
 # Log Files
 *.log
-
-*.iml
 
 .DS_Store
