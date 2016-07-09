@@ -128,9 +128,9 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
                 LogUtils.d(TAG, "-----------buffering-----------");
                 break;
             case ExoPlayer.STATE_READY:
+                isEnd = false;
                 showProgress(false);
                 pendingFadeOut();
-                isEnd = false;
                 if (!mPlayer.isPlaying()) {
                     mHandler.removeMessages(SHOW_PROGRESS);
                     progressUpdating = false;
@@ -142,13 +142,16 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
                 LogUtils.d(TAG, "-----------ready-----------");
                 break;
             case ExoPlayer.STATE_ENDED:
-                showProgress(false);
                 isEnd = true;
+                showProgress(false);
+                setProgress();
+                show();
+                mHandler.removeMessages(SHOW_PROGRESS);
+                progressUpdating = false;
                 LogUtils.d(TAG, "-----------ended-----------");
                 break;
         }
-        if (!isEnd)
-            updatePausePlay();
+        updatePausePlay();
     }
 
     private void showProgress(boolean showProgress) {
@@ -169,6 +172,9 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
             pendingFadeOut();
     }
 
+    /**
+     * add the controller to the screen.
+     */
     public void show() {
         if (mShowing || mAnchor == null)
             return;
@@ -228,7 +234,6 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
             if (duration > 0) {
                 // use long to avoid overflow
                 long pos = 1000L * position / duration;
-                LogUtils.d(TAG, "position: " + pos);
                 mProgress.setProgress((int) pos);
             }
             int percent = mPlayer.getBufferPercentage();
@@ -371,10 +376,6 @@ public class CustomMediaController extends FrameLayout implements DemoPlayer.Lis
                     if (!view.isEnd) {
                         msg = obtainMessage(SHOW_PROGRESS);
                         sendMessageDelayed(msg, 1000 - (pos % 1000));
-                    } else {
-                        view.progressUpdating = false;
-                        view.updatePausePlay();
-                        view.show();
                     }
                     break;
             }
