@@ -37,7 +37,7 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             view.setOnClickListener(mClickListener);
             return new VideoViewHolder(view);
         } else if (viewType == Item.TYPE_PIC | viewType == Item.TYPE_LONGPIC | viewType == Item.TYPE_GIF) {
-            final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_pic, parent, false);
+            final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_image, parent, false);
             view.setOnClickListener(mClickListener);
             return new ImageViewHolder(view);
         } else if (viewType == Item.TYPE_LINK | viewType == Item.TYPE_TUJI | viewType == Item.TYPE_DUANZI) {
