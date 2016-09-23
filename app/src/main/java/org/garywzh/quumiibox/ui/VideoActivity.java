@@ -217,7 +217,7 @@ public class VideoActivity extends AppCompatActivity implements SurfaceHolder.Ca
             isFullScreen = true;
 
             videoRoot.setLayoutParams(new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, shouldPortrait ? displayMetrics.heightPixels : displayMetrics.widthPixels));
+                    LinearLayout.LayoutParams.MATCH_PARENT, shouldPortrait ? LinearLayout.LayoutParams.MATCH_PARENT : displayMetrics.widthPixels));
         } else {
             View decorView = getWindow().getDecorView();
             decorView.setSystemUiVisibility(0);
